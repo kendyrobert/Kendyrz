@@ -169,12 +169,31 @@ body{background:radial-gradient(900px 500px at 85% -10%,#a56cff22,transparent),r
 .bd{position:absolute;top:16px;right:16px;background:var(--k);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;text-transform:uppercase;pointer-events:none}.list .bd{top:auto;bottom:10px;right:56px}
 .it.sel{box-shadow:0 0 0 2px var(--ac)}
 .qr{background:#fff;border-radius:18px;padding:10px;width:max-content;max-width:100%;margin:12px auto}.qr img{display:block;width:250px;max-width:100%}.box a.btn{display:block;text-align:center}
-.tabs{display:none}
-@media(max-width:800px){#side,#ov{display:none!important}.burger,.fab{display:none!important}
-.tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom));justify-content:space-around;align-items:center}
-.tabs a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mu);padding:6px 0;border-radius:12px}.tabs a span{font-size:22px}.tabs a.on{color:var(--ac);font-weight:700}
-.tup{flex:none;width:58px;height:58px;margin:-28px 8px 0;border-radius:50%;border:0;font-size:32px;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));box-shadow:0 8px 24px #5b8cff77;cursor:pointer}
-main{padding-bottom:120px}#ups{bottom:96px}.dh{padding:20px}.dh .av{width:60px;height:60px}.ring{width:170px}}
+
+/* ===== compacto + menú hamburguesa ===== */
+body{font-size:14px}
+.dh{padding:16px 18px;border-radius:20px;margin:4px 0 12px}.dh:after{font-size:110px}.dh h1{font-size:clamp(20px,5vw,26px);margin:0 0 10px}.dh p{font-size:13px}.dh .av{width:52px;height:52px;font-size:22px}.qa .btn{padding:8px 14px;font-size:13px}
+.dg{gap:12px}.card{padding:14px;border-radius:16px}.card h3{font-size:15px}.ring{width:140px;margin:4px auto 10px}.ring b{font-size:24px}.lg2{font-size:12px}
+.stats2{gap:8px}.tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"i n" "i l";align-items:center;gap:0 10px;padding:10px 12px;border-radius:14px}.tile span{grid-area:i;width:36px;height:36px;font-size:18px;margin:0}.tile b{grid-area:n;font-size:20px}.tile small{grid-area:l}
+.sec{font-size:15px;margin:16px 0 8px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.grid .it{padding:8px;border-radius:14px}.grid .th{height:84px;font-size:34px;border-radius:10px}.nm{font-size:13px}.mt{font-size:11px}.grid .in{margin-top:6px}
+.list .it{padding:6px 8px 6px 38px}.list .th{width:36px;height:36px;font-size:20px}
+.dots{width:32px;height:32px;font-size:18px}.ck{width:16px!important;height:16px;top:12px;left:12px}.bd{top:12px;right:12px;font-size:9px;padding:1px 6px}
+.top{padding:max(10px,env(safe-area-inset-top)) 16px 8px}.top h2{font-size:18px}.ib{width:38px;height:38px}.av.sm2{width:34px;height:34px;font-size:14px}.upm{display:none}
+.btn{padding:9px 14px}.tools .btn{padding:8px 12px;font-size:13px}.chip2{padding:6px 12px;font-size:13px}.crumbs{font-size:15px}main{padding:4px 16px 40px}
+#side{width:270px;padding:16px 12px;gap:4px;overflow-y:auto}
+.dr-h{display:flex;align-items:center;gap:10px;padding:6px 6px 12px;border-bottom:1px solid var(--bd);margin-bottom:6px}.dr-h .av.big{width:44px;height:44px;font-size:18px}.dr-u{flex:1;min-width:0;display:flex;flex-direction:column}.dr-u b,.dr-u small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dr-h .x{display:none;width:34px;height:34px}
+.dr-q{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 2px}.dr-q .btn{margin:0;padding:9px 6px;font-size:13px;text-align:center}
+.dr-s{font-size:12px;color:var(--mu);padding:12px 8px 4px;font-weight:600}
+#side nav{flex:none!important;gap:2px}#side nav a{padding:9px 12px;font-size:14px;gap:10px;display:flex;align-items:center}#side nav a span{width:22px;text-align:center}
+#side nav a em{margin-left:auto;font-style:normal;background:var(--bd);padding:1px 8px;border-radius:99px;font-size:11px}#side nav a.on em{background:#fff3}#side nav a i{font-style:normal}#side nav a.out{color:var(--er)}
+.meter{margin-top:auto}
+@media(max-width:800px){
+#side{display:flex!important;transform:translateX(-100%);width:min(300px,84vw);box-shadow:var(--sh)}#side.open{transform:none}
+#ov{display:none!important}#ov.on{display:block!important}
+.burger{display:block!important}.top .btn.dsk{display:none}.upm{display:grid}.dr-h .x{display:block}
+.mainw{margin-left:0}main{padding:4px 12px 40px}#ups{bottom:12px}.grid{grid-template-columns:repeat(2,1fr)}
+}
 </style></head>
 <body><div id="app"><div class="load">☁️</div></div><input type="file" id="fi" multiple hidden><div id="ups"></div><div id="toasts"></div>
 <script type="module">
@@ -238,9 +257,10 @@ function landing(){const R='data-a="go" data-id="register"';return`<header class
 function authPages(){const m=S.page;if(m==='landing'){$('#app').innerHTML=landing();return}
 const T={login:['Iniciar sesión','Bienvenido de nuevo'],register:['Crear cuenta','Empieza con 10 GB gratis'],reset:['Recuperar contraseña','Te enviaremos un enlace por correo']}[m];
 $('#app').innerHTML=`<div class="authw"><div class="authb"><a class="logo" data-a="go" data-id="landing">☁️ MediaCloud</a><h2>${T[0]}</h2><p class="mu">${T[1]}</p>${m==='register'?'<input id="nm" placeholder="Nombre" autocomplete="name">':''}<input id="em" type="email" placeholder="Email" autocomplete="email">${m!=='reset'?`<input id="pw" type="password" placeholder="Contraseña" autocomplete="${m==='login'?'current-password':'new-password'}">`:''}${m==='register'?'<input id="pw2" type="password" placeholder="Confirmar contraseña" autocomplete="new-password">':''}<div id="err" class="er"></div><button id="sub" class="btn big" data-a="auth" data-id="${m}">${T[0]}</button>${m!=='reset'?'<button class="btn ghost big" data-a="google"><b style="color:#4285f4">G</b> Continuar con Google</button>':''}<div class="lk">${m!=='login'?'<a data-a="go" data-id="login">Iniciar sesión</a>':''}${m!=='register'?'<a data-a="go" data-id="register">Crear cuenta</a>':''}${m==='login'?'<a data-a="go" data-id="reset">Recuperar contraseña</a>':''}</div></div></div>`}
-function shell(){const T=[['dash','🏠','Inicio'],['files','📁','Archivos'],['up'],['shared','🔗','Enlaces'],['trash','🗑️','Papelera']];
-$('#app').innerHTML=`<div id="ov" data-a="burger"></div><aside id="side"><div class="logo">☁️ MediaCloud</div><nav>${NAV.map(([k,i,l])=>`<a class="${S.view===k?'on':''}" data-a="view" data-id="${k}">${i} ${l}</a>`).join('')}</nav><div class="meter" id="usage"></div></aside><div class="mainw"><header class="top"><button class="ib burger" data-a="burger">☰</button><h2>${NAV.find(x=>x[0]===S.view)[2]}</h2><div class="sp"></div><button class="btn" data-a="pick">⬆ Subir</button><span class="av" id="av" data-a="view" data-id="acct" style="cursor:pointer"></span></header><main id="main"></main></div><nav class="tabs">${T.map(([k,i,l])=>k==='up'?'<button class="tup" data-a="pick" aria-label="Subir archivos">＋</button>':`<a class="${S.view===k?'on':''}" data-a="view" data-id="${k}"><span>${i}</span>${l}</a>`).join('')}</nav>`;usageUpd();renderMain()}
-function usageUpd(){const u=used(),q=quota();if($('#usage'))$('#usage').innerHTML=`<small>Almacenamiento</small><b>${sz(u)} / ${sz(q)}</b><div class="bar"><i style="width:${Math.min(100,u/q*100)}%"></i></div>`;if($('#av'))$('#av').innerHTML=av()}
+function shell(){const nm=esc(S.profile?.name||S.user.displayName||'Usuario'),cnt=S.files.filter(x=>x.trashed&&live(x)).length,ns=S.shares.filter(s=>s.active).length,dark=document.documentElement.dataset.theme==='dark';
+const L=(k,i,l,b)=>`<a class="${S.view===k?'on':''}" data-a="view" data-id="${k}"><span>${i}</span>${l}${b?`<em>${b}</em>`:''}</a>`;
+$('#app').innerHTML=`<div id="ov" data-a="burger"></div><aside id="side"><div class="dr-h"><span class="av big" id="av2"></span><div class="dr-u"><b>${nm}</b><small>${esc(S.user.email)}</small></div><button class="ib x" data-a="burger" aria-label="Cerrar">✕</button></div><div class="dr-q"><button class="btn" data-a="dpick">⬆ Subir</button><button class="btn ghost" data-a="dnewf">📁 Carpeta</button></div><div class="dr-s">Menú</div><nav>${L('dash','🏠','Inicio')}${L('files','📁','Mis archivos')}${L('shared','🔗','Compartidos',ns||'')}${L('trash','🗑️','Papelera',cnt||'')}</nav><div class="dr-s">Cuenta</div><nav>${L('acct','⚙️','Perfil y ajustes')}<a data-a="theme"><span>${dark?'☀️':'🌙'}</span><i>${dark?'Tema claro':'Tema oscuro'}</i></a><a class="out" data-a="out"><span>🚪</span>Cerrar sesión</a></nav><div class="meter" id="usage"></div></aside><div class="mainw"><header class="top"><button class="ib burger" data-a="burger" aria-label="Menú">☰</button><h2>${NAV.find(x=>x[0]===S.view)[2]}</h2><div class="sp"></div><button class="btn dsk" data-a="pick">⬆ Subir</button><button class="ib upm" data-a="pick" aria-label="Subir">⬆</button><span class="av sm2" id="av" data-a="view" data-id="acct"></span></header><main id="main"></main></div>`;usageUpd();renderMain()}
+function usageUpd(){const u=used(),q=quota();if($('#usage'))$('#usage').innerHTML=`<small>Almacenamiento</small><b>${sz(u)} / ${sz(q)}</b><div class="bar"><i style="width:${Math.min(100,u/q*100)}%"></i></div>`;if($('#av'))$('#av').innerHTML=av();if($('#av2'))$('#av2').innerHTML=av()}
 const card=f=>{const k=kind(f),e=ext(f.name);return`<div class="it k-${k}${S.sel.has(f.id)?' sel':''}" data-a="open" data-id="${f.id}"><input type="checkbox" class="ck" data-a="sel" data-id="${f.id}" ${S.sel.has(f.id)?'checked':''}><div class="th" ${k==='image'?`data-th="${f.id}"`:''}>${icon(f)}</div>${!f.isFolder&&e?`<span class="bd">${esc(e.slice(0,4))}</span>`:''}<div class="in"><div class="nm">${esc(f.name)}</div><div class="mt">${f.isFolder?'Carpeta':sz(f.size)} · ${fd(f.t)}${S.shares.some(s=>s.id===f.id&&s.active)?' · 🔗':''}</div></div><button class="dots" data-a="menu" data-id="${f.id}" aria-label="Opciones">⋮</button></div>`};
 const V={
 dash(){const f=S.files.filter(x=>!x.trashed&&live(x)),fl=f.filter(x=>!x.isFolder),u=used(),q=quota(),pct=Math.min(100,u/q*100),nm=esc(S.profile?.name||S.user.displayName||'');
@@ -313,6 +333,8 @@ async empty(){const ids=S.files.filter(f=>f.trashed&&live(f)).map(f=>f.id);if(id
 async share(id){const f=byId(id),s=S.shares.find(x=>x.id===id);if(!s)await setDoc(doc(db,'shares',id),{ownerId:S.user.uid,name:f.name,size:f.size,mime:f.mime||'',url:f.url,createdAt:serverTimestamp(),active:true,downloads:0});else if(!s.active)await updateDoc(doc(db,'shares',id),{active:true});return act.qr(id)},
 async qr(id){const L=link(id),nm=(byId(id)||S.shares.find(x=>x.id===id)||{}).name||'archivo',{default:Q}=await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm'),img=await Q.toDataURL(L,{width:360,margin:2,color:{dark:'#0a0f1f',light:'#ffffff'}});
 if(await modal('Compartir archivo',`<p class="mu">Escanea el código con la cámara para abrir la página de descarga de «${esc(nm)}», o copia el enlace.</p><div class="qr"><img src="${img}" alt="Código QR"></div><input readonly value="${L}" onfocus="this.select()"><a class="btn ghost" href="${img}" download="QR-${esc(nm)}.png">⬇ Guardar imagen del QR</a>`,'Copiar enlace'))copy(L)},
+theme(id,el){const d=document.documentElement.dataset.theme!=='dark';setTheme(d);el.innerHTML=`<span>${d?'☀️':'🌙'}</span><i>${d?'Tema claro':'Tema oscuro'}</i>`},
+burger2(){$('#side').classList.remove('open');$('#ov').classList.remove('on')},dpick(){act.burger2();$('#fi').click()},dnewf(){act.burger2();return act.newf()},
 async newfd(){S.parent='root';return act.newf()},flt(id){S.filter=id;renderMain()},
 cp(id){copy(link(id))},async tog(id){const s=S.shares.find(x=>x.id===id);await updateDoc(doc(db,'shares',id),{active:!s.active});toast(s.active?'Enlace desactivado':'Enlace activado')},
 async saven(){const n=$('#pn').value.trim();if(!n)return toast('El nombre es obligatorio',1);await updateProfile(auth.currentUser,{displayName:n});await updateDoc(doc(db,'users',S.user.uid),{name:n});toast('Nombre actualizado')},
