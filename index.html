@@ -1,56 +1,8 @@
 <!DOCTYPE html>
-<!--
-STORCLOUD - CONFIGURACIÓN (una sola vez)
-1) Firebase > Authentication > Método de acceso: habilita "Correo/contraseña", "Google", "GitHub" y "Teléfono".
-   GitHub: crea una OAuth App en github.com > Settings > Developer settings y pega Client ID/Secret en Firebase; en GitHub usa como callback la URL que Firebase te muestra.
-   Teléfono: se verifica por SMS (reCAPTCHA invisible). Revisa los límites de SMS de tu plan de Firebase.
-   Authentication > Configuración > Dominios autorizados: añade el dominio donde publiques (localhost ya viene).
-2) Firebase > Firestore Database > Crear base de datos > pestaña Reglas: pega esto y Publica:
-
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function signed() { return request.auth != null && (request.auth.token.firebase.sign_in_provider != 'password' || request.auth.token.email_verified == true); }
-    function isAdmin() { return signed() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
-    match /users/{u} {
-      allow read: if signed() && (request.auth.uid == u || isAdmin());
-      allow create: if signed() && request.auth.uid == u
-        && request.resource.data.keys().hasOnly(['name','email','quota','photo','createdAt'])
-        && request.resource.data.quota == 10737418240;
-      allow update: if signed() && request.auth.uid == u
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','photo']);
-    }
-    match /files/{f} {
-      allow read: if signed() && (resource.data.ownerId == request.auth.uid || isAdmin());
-      allow create: if signed() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if signed() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid;
-      allow delete: if signed() && resource.data.ownerId == request.auth.uid;
-    }
-    match /shares/{s} {
-      allow get: if resource.data.active == true || (signed() && resource.data.ownerId == request.auth.uid);
-      allow list: if signed() && (resource.data.ownerId == request.auth.uid || isAdmin());
-      allow create: if signed() && request.resource.data.ownerId == request.auth.uid && request.resource.data.downloads == 0;
-      allow update: if (signed() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid)
-        || (resource.data.active == true
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloads'])
-            && request.resource.data.downloads == resource.data.downloads + 1);
-      allow delete: if signed() && resource.data.ownerId == request.auth.uid;
-    }
-    match /admins/{a} { allow read: if signed() && request.auth.uid == a; }
-  }
-}
-
-3) Cloudinary > Settings > Upload > Upload presets: el preset "KendyR" debe estar en modo "Unsigned".
-4) Abre esta página con http/https (python -m http.server 8000) o publícala; Google no funciona desde file://.
-Firebase Storage NO se usa: los archivos van a Cloudinary.
--->
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Storcloud · Almacenamiento de archivos en la nube</title><meta name="theme-color" content="#0a1113">
 <meta name="description" content="Storcloud es tu espacio de almacenamiento de archivos en la nube: guarda fotos, videos y documentos, descárgalos desde cualquier dispositivo y compártelos con un enlace o código QR. 10 GB gratis.">
-<meta name="keywords" content="Storcloud, almacenamiento de archivos, almacenamiento en la nube, guardar archivos online, nube gratis, compartir archivos, subir archivos, 10 GB gratis">
-<meta name="robots" content="index,follow"><meta name="application-name" content="Storcloud"><meta name="apple-mobile-web-app-title" content="Storcloud">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Storcloud"><meta property="og:locale" content="es_ES"><meta property="og:title" content="Storcloud · Almacenamiento de archivos en la nube"><meta property="og:description" content="Storcloud es tu espacio de almacenamiento de archivos en la nube: guarda fotos, videos y documentos, descárgalos desde cualquier dispositivo y compártelos con un enlace o código QR. 10 GB gratis.">
-<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Storcloud · Almacenamiento de archivos en la nube"><meta name="twitter:description" content="Storcloud es tu espacio de almacenamiento de archivos en la nube: guarda fotos, videos y documentos, descárgalos desde cualquier dispositivo y compártelos con un enlace o código QR. 10 GB gratis.">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Storcloud","alternateName":["Storcloud almacenamiento de archivos","Storcloud nube"],"applicationCategory":"UtilitiesApplication","operatingSystem":"Web","inLanguage":"es","description":"Storcloud es tu espacio de almacenamiento de archivos en la nube: guarda fotos, videos y documentos, descárgalos desde cualquier dispositivo y compártelos con un enlace o código QR. 10 GB gratis.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<meta property="og:type" content="website"><meta property="og:site_name" content="Storcloud"><meta property="og:title" content="Storcloud · Almacenamiento de archivos en la nube"><meta property="og:description" content="Storcloud es tu espacio de almacenamiento de archivos en la nube: guarda fotos, videos y documentos, descárgalos desde cualquier dispositivo y compártelos con un enlace o código QR. 10 GB gratis.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Storcloud","alternateName":"Storcloud almacenamiento de archivos"}</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%230b8176'/><g fill='white'><circle cx='25' cy='36' r='8'/><circle cx='35' cy='29' r='11'/><circle cx='45' cy='37' r='7'/><rect x='25' y='36' width='20' height='8'/></g></svg>">
 <script>document.documentElement.dataset.theme=localStorage.getItem('mc-theme')||'dark'</script>
 <style>
@@ -58,158 +10,264 @@ Firebase Storage NO se usa: los archivos van a Cloudinary.
 [data-theme=light]{--bg:#f2f6f5;--card:#fff;--bd:#dce7e4;--tx:#10201e;--mu:#5b706c;--lk:#0b8176;--sh:0 6px 24px #0f3a3414}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden;min-height:100vh}
-a{color:var(--ac);cursor:pointer;text-decoration:none}button,input,select{font:inherit;color:inherit}
+a{color:var(--ac);cursor:pointer;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
 input,select{width:100%;padding:12px 14px;margin:6px 0;border-radius:12px;border:1px solid var(--bd);background:var(--card);outline:0}
-input:focus,select:focus{border-color:var(--ac)}input[type=checkbox]{width:auto;margin:0}
+input:focus,select:focus{border-color:var(--ac)}
+input[type=checkbox]{width:auto;margin:0}
 .btn{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border:0;padding:11px 18px;border-radius:12px;cursor:pointer;font-weight:600;margin:4px 0;transition:.2s;white-space:nowrap}
-.btn:hover{filter:brightness(1.12)}.btn:disabled{opacity:.6}.btn.ghost{background:none;border:1px solid var(--bd);color:var(--tx)}.btn.er{background:var(--er);color:#fff}.btn.big{width:100%;padding:14px}
+.btn:hover{filter:brightness(1.12)}
+.btn:disabled{opacity:.6}
+.btn.ghost{background:none;border:1px solid var(--bd);color:var(--tx)}
+.btn.er{background:var(--er);color:#fff}
+.btn.big{width:100%;padding:14px}
 .ib{background:none;border:1px solid var(--bd);border-radius:10px;width:42px;height:42px;cursor:pointer}
-.mu,small{color:var(--mu)}.er{color:var(--er)}.logo{font-weight:800;font-size:20px;color:var(--tx);cursor:pointer}
-.load{display:grid;place-items:center;height:100vh;font-size:60px;animation:pu 1s infinite alternate}@keyframes pu{to{transform:scale(1.2);opacity:.5}}
-/* landing & auth */
+.mu,small{color:var(--mu)}
+.er{color:var(--er)}
+.logo{font-weight:800;font-size:20px;color:var(--tx);cursor:pointer}
+.load{display:grid;place-items:center;height:100vh;font-size:60px;animation:pu 1s infinite alternate}
+@keyframes pu{to{transform:scale(1.2);opacity:.5}}
 .nav{display:flex;justify-content:space-between;align-items:center;padding:18px 24px}
-.hero{text-align:center;padding:70px 20px 40px;background:radial-gradient(600px 300px at 50% 0,#0b817633,transparent)}
-.hero h1{font-size:clamp(42px,9vw,84px);letter-spacing:-2px}.hero h1 span{background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{font-size:20px;color:var(--mu);margin:12px 0 26px}.hero .btn{margin:6px;padding:14px 26px}
-.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:30px 24px 60px;max-width:1100px;margin:auto}
-.authw{display:grid;place-items:center;min-height:100vh;padding:20px}.authb{width:100%;max-width:420px;background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:28px;box-shadow:var(--sh)}
-.authb h2{margin:14px 0 2px}.authb .er{min-height:22px;font-size:14px}.lk{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-size:14px}
-/* shell */
+.authw{display:grid;place-items:center;min-height:100vh;padding:20px}
+.authb{width:100%;max-width:420px;background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:28px;box-shadow:var(--sh)}
+.authb h2{margin:14px 0 2px}
+.authb .er{min-height:22px;font-size:14px}
+.lk{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-size:14px}
 #side{position:fixed;inset:0 auto 0 0;width:250px;background:var(--card);border-right:1px solid var(--bd);padding:20px 14px;display:flex;flex-direction:column;gap:18px;z-index:30;transition:.25s}
-#side nav{display:flex;flex-direction:column;gap:4px;flex:1}#side nav a{padding:12px 14px;border-radius:12px;color:var(--tx)}
-#side nav a:hover{background:var(--bd)}#side nav a.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}
+#side nav{display:flex;flex-direction:column;gap:4px;flex:1}
+#side nav a{padding:12px 14px;border-radius:12px;color:var(--tx)}
+#side nav a:hover{background:var(--bd)}
+#side nav a.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}
 .meter{padding:12px;border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;gap:6px}
-.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}.bar.big{height:14px}
-.mainw{margin-left:250px}.top{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 24px 14px;position:sticky;top:0;background:var(--bg);z-index:10}
-.sp{flex:1}.burger{display:none}main{padding:8px 24px 110px;max-width:1200px}
-.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;display:inline-grid;place-items:center;font-weight:700;overflow:hidden;flex:none}.av img{width:100%;height:100%;object-fit:cover}.av.big{width:64px;height:64px;font-size:26px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px;box-shadow:var(--sh);margin-bottom:16px}.card h3{margin-bottom:8px}
-.card label{display:block;margin-top:10px;color:var(--mu);font-size:13px}.sw{display:flex!important;gap:10px;align-items:center;color:var(--tx)!important;font-size:15px!important;margin:12px 0!important}
-.hi{display:flex;gap:14px;align-items:center;margin:8px 0 18px}.sec{margin:20px 0 10px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}.stat{cursor:pointer;display:flex;flex-direction:column;gap:2px;margin:0;transition:.2s}.stat:hover{transform:translateY(-3px)}.stat b{font-size:28px}.stat span{font-size:24px}
+.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
+.bar.big{height:14px}
+.mainw{margin-left:250px}
+.top{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 24px 14px;position:sticky;top:0;background:var(--bg);z-index:10}
+.sp{flex:1}
+.burger{display:none}
+main{padding:8px 24px 110px;max-width:1200px}
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;display:inline-grid;place-items:center;font-weight:700;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.av.big{width:64px;height:64px;font-size:26px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px;box-shadow:var(--sh);margin-bottom:16px}
+.card h3{margin-bottom:8px}
+.card label{display:block;margin-top:10px;color:var(--mu);font-size:13px}
+.sw{display:flex!important;gap:10px;align-items:center;color:var(--tx)!important;font-size:15px!important;margin:12px 0!important}
+.hi{display:flex;gap:14px;align-items:center;margin:8px 0 18px}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}
-/* files */
-.tb{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}.crumbs{font-weight:600;display:flex;flex-wrap:wrap;gap:6px}.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.tools input{width:180px;margin:0}.tools select{width:auto;margin:0}.tools .btn{margin:0}
-.selbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--ac);border-radius:14px;padding:8px 12px;margin-bottom:12px}.selbar .btn{margin:0}
+.tb{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-bottom:12px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools input{width:180px;margin:0}
+.tools select{width:auto;margin:0}
+.tools .btn{margin:0}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
-.it{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:16px;cursor:pointer;transition:.2s;animation:in .25s}@keyframes in{from{opacity:0;transform:scale(.97)}}
-.it:hover{border-color:var(--ac)}.it.sel{border-color:var(--ac);background:#0b817622}
-.grid .it{padding:10px}.grid .th{height:110px;border-radius:12px;background:var(--bg);display:grid;place-items:center;font-size:46px;overflow:hidden}.th img{width:100%;height:100%;object-fit:cover}
-.nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mt{font-size:12px;color:var(--mu)}.grid .in{margin-top:8px;padding-right:26px}
-.ck{position:absolute;top:16px;left:16px;width:18px!important;height:18px;display:none!important}#list .ck{display:block!important}.grid .dots{position:absolute;right:6px;bottom:8px}
-.dots{background:none;border:0;font-size:22px;width:38px;height:38px;border-radius:50%;cursor:pointer}.dots:hover{background:var(--bd)}
-.list{display:flex;flex-direction:column;gap:8px}.list .it{display:flex;align-items:center;gap:12px;padding:8px 10px 8px 42px}.list .th{font-size:26px;width:44px;height:44px;display:grid;place-items:center;border-radius:10px;overflow:hidden;flex:none}.list .in{flex:1;min-width:0}.list .ck{top:50%;left:14px;transform:translateY(-50%)}.list .btn{margin:0}
+.it{position:relative;background:var(--card);border:1px solid var(--bd);border-radius:16px;cursor:pointer;transition:.2s;animation:in .25s}
+@keyframes in{from{opacity:0;transform:scale(.97)}}
+.it:hover{border-color:var(--ac)}
+.it.sel{border-color:var(--ac);background:#0b817622}
+.grid .it{padding:10px}
+.grid .th{height:110px;border-radius:12px;background:var(--bg);display:grid;place-items:center;font-size:46px;overflow:hidden}
+.th img{width:100%;height:100%;object-fit:cover}
+.nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt{font-size:12px;color:var(--mu)}
+.grid .in{margin-top:8px;padding-right:26px}
+.grid .dots{position:absolute;right:6px;bottom:8px}
+.dots{background:none;border:0;font-size:22px;width:38px;height:38px;border-radius:50%;cursor:pointer}
+.dots:hover{background:var(--bd)}
+.list{display:flex;flex-direction:column;gap:8px}
+.list .it{display:flex;align-items:center;gap:12px;padding:8px 10px 8px 42px}
+.list .th{font-size:26px;width:44px;height:44px;display:grid;place-items:center;border-radius:10px;overflow:hidden;flex:none}
+.list .in{flex:1;min-width:0}
+.list .btn{margin:0}
 .list.shr .it{padding-left:12px}
-.pop{position:fixed;z-index:60;background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:6px;min-width:170px;animation:in .15s}.pop button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px;border-radius:10px;cursor:pointer}.pop button:hover{background:var(--bd)}
-.empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--mu)}.empty>div{font-size:64px}.empty h3{color:var(--tx);margin:6px 0}.empty .btn{margin-top:12px}
+.pop{position:fixed;z-index:60;background:var(--card);border:1px solid var(--bd);border-radius:14px;box-shadow:var(--sh);padding:6px;min-width:170px;animation:in .15s}
+.pop button{display:block;width:100%;text-align:left;background:none;border:0;padding:12px;border-radius:10px;cursor:pointer}
+.pop button:hover{background:var(--bd)}
+.empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--mu)}
+.empty>div{font-size:64px}
+.empty h3{color:var(--tx);margin:6px 0}
+.empty .btn{margin-top:12px}
 body.drag #list{outline:3px dashed var(--ac);outline-offset:6px;border-radius:16px}
-.sk{height:170px;border-radius:16px;background:linear-gradient(90deg,var(--card),var(--bd),var(--card));background-size:200% 100%;animation:sk 1.2s infinite}@keyframes sk{to{background-position:-200% 0}}
-/* overlays */
-.modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:70;padding:16px;animation:in .2s}.box{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow:auto}
-.box h3{margin-bottom:10px;word-break:break-all}.box .row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}.pv{margin:10px 0;text-align:center}.pv img,.pv video{max-width:100%;max-height:55vh;border-radius:12px}.pv iframe{width:100%;height:55vh;border:0;border-radius:12px;background:#fff}.pv audio{width:100%}.bigic{font-size:80px}
+.sk{height:170px;border-radius:16px;background:linear-gradient(90deg,var(--card),var(--bd),var(--card));background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.modal{position:fixed;inset:0;background:#0009;display:grid;place-items:center;z-index:70;padding:16px;animation:in .2s}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow:auto}
+.box h3{margin-bottom:10px;word-break:break-all}
+.box .row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.pv{margin:10px 0;text-align:center}
+.pv img,.pv video{max-width:100%;max-height:55vh;border-radius:12px}
+.pv iframe{width:100%;height:55vh;border:0;border-radius:12px;background:#fff}
+.pv audio{width:100%}
+.bigic{font-size:80px}
 #ups{position:fixed;right:16px;bottom:16px;width:min(340px,calc(100vw - 32px));display:flex;flex-direction:column;gap:8px;z-index:50}
-.up{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:6px}.up b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.up.ok .s{color:var(--ok)}.up.bad .s{color:var(--er)}
+.up{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:6px}
+.up b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up.ok .s{color:var(--ok)}
+.up.bad .s{color:var(--er)}
 #toasts{position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:90;width:max-content;max-width:92vw}
-.toast{background:var(--card);border:1px solid var(--ok);padding:12px 18px;border-radius:14px;box-shadow:var(--sh);animation:in .25s}.toast.er{border-color:var(--er)}
-.fab{display:none;position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:0;font-size:30px;color:#fff;background:linear-gradient(135deg,var(--ac),var(--ac2));box-shadow:var(--sh);z-index:40;cursor:pointer}
-#ov{display:none;position:fixed;inset:0;background:#0007;z-index:25}#ov.on{display:block}
-@media(max-width:800px){#side{transform:translateX(-100%)}#side.open{transform:none}.mainw{margin-left:0}.burger{display:block}.top{padding:max(12px,env(safe-area-inset-top)) 14px 10px}.top .btn{display:none}main{padding:6px 14px 110px}.fab{display:block}#ups{bottom:90px}.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.tools{width:100%}.tools input{flex:1 1 100%;width:100%}.tools select{flex:1}.dots{width:44px;height:44px}.list.shr .it{flex-wrap:wrap}}
+.toast{background:var(--card);border:1px solid var(--ok);padding:12px 18px;border-radius:14px;box-shadow:var(--sh);animation:in .25s}
+.toast.er{border-color:var(--er)}
+#ov{display:none;position:fixed;inset:0;background:#0007;z-index:25}
+#ov.on{display:block}
+@media(max-width:800px){#side{transform:translateX(-100%)}
+#side.open{transform:none}
+.mainw{margin-left:0}
+.burger{display:block}
+.top{padding:max(12px,env(safe-area-inset-top)) 14px 10px}
+.top .btn{display:none}
+main{padding:6px 14px 110px}
+#ups{bottom:90px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.tools{width:100%}
+.tools input{flex:1 1 100%;width:100%}
+.tools select{flex:1}
+.dots{width:44px;height:44px}
+.list.shr .it{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-
-
-/* ===== landing v2 ===== */
 .nav{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:max(12px,env(safe-area-inset-top)) 18px 12px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
-.nav .logo{white-space:nowrap}.na{display:flex;gap:8px}.na .btn{margin:0;padding:9px 14px;font-size:14px}.sm{display:none}
+.nav .logo{white-space:nowrap}
+.na{display:flex;gap:8px}
+.na .btn{margin:0;padding:9px 14px;font-size:14px}
+.sm{display:none}
 .hero2{display:grid;gap:34px;padding:40px 18px 30px;max-width:1150px;margin:auto;align-items:center;position:relative;isolation:isolate}
 .hero2:before{content:"";position:absolute;inset:-70px -30vw auto;height:560px;background:radial-gradient(500px 280px at 30% 25%,#0b817640,transparent),radial-gradient(420px 260px at 78% 45%,#0b817635,transparent);z-index:-1;pointer-events:none}
 .chip{display:inline-block;padding:6px 14px;border:1px solid var(--bd);border-radius:99px;background:var(--card);font-size:13px;color:var(--mu)}
 .ht h1{font-size:clamp(40px,10.5vw,78px);line-height:1.02;letter-spacing:-2px;margin:16px 0}
 .ht h1 em{font-style:normal;background:linear-gradient(135deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .ht p{font-size:18px;color:var(--mu);max-width:520px;margin-bottom:22px}
-.cta{display:flex;flex-direction:column;gap:10px;max-width:380px;margin-bottom:12px}.cta .btn{margin:0}
+.cta{display:flex;flex-direction:column;gap:10px;max-width:380px;margin-bottom:12px}
+.cta .btn{margin:0}
 .hv{position:relative;padding:26px 12px 44px;max-width:520px;width:100%;margin:auto}
 .win{background:var(--card);border:1px solid var(--bd);border-radius:22px;box-shadow:0 30px 80px #0b817630;overflow:hidden;rotate:-2deg;animation:fl 6s ease-in-out infinite}
-.wb{display:flex;gap:6px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bd);font-weight:700}.wb i{width:10px;height:10px;border-radius:50%}.wb i:nth-child(1){background:#ff5f57}.wb i:nth-child(2){background:#febc2e}.wb i:nth-child(3){background:#28c840}.wb span{margin-left:8px}
+.wb{display:flex;gap:6px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bd);font-weight:700}
+.wb i{width:10px;height:10px;border-radius:50%}
+.wb i:nth-child(1){background:#ff5f57}
+.wb i:nth-child(2){background:#febc2e}
+.wb i:nth-child(3){background:#28c840}
+.wb span{margin-left:8px}
 .wg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px}
-.wf{background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:12px 6px;text-align:center;font-size:30px;display:flex;flex-direction:column;gap:4px}.wf b{font-size:12px;font-weight:600}
-.wu{margin:0 14px 14px;padding:12px;border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;gap:6px}.wu .bar i{animation:up 4s ease-in-out infinite}
-@keyframes up{0%{width:4%}100%{width:100%}}@keyframes fl{50%{translate:0 -10px}}
+.wf{background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:12px 6px;text-align:center;font-size:30px;display:flex;flex-direction:column;gap:4px}
+.wf b{font-size:12px;font-weight:600}
+.wu{margin:0 14px 14px;padding:12px;border:1px solid var(--bd);border-radius:14px;display:flex;flex-direction:column;gap:6px}
+.wu .bar i{animation:up 4s ease-in-out infinite}
+@keyframes up{0%{width:4%}100%{width:100%}}
+@keyframes fl{50%{translate:0 -10px}}
 .fl{position:absolute;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px 13px;font-size:24px;box-shadow:var(--sh);animation:fl 5s ease-in-out infinite}
-.f1{top:0;right:0}.f2{bottom:6px;left:0;animation-delay:-2s}.f3{bottom:46px;right:-2px;animation-delay:-3s}.f4{top:8px;left:0;font-size:13px;animation-delay:-1s;color:var(--ok);font-weight:600}
-.band{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;max-width:1150px;margin:10px auto 0;padding:0 18px}
-.band div{padding:16px;border:1px solid var(--bd);border-radius:18px;background:var(--card);text-align:center;color:var(--mu);font-size:14px}.band b{display:block;font-size:28px;color:var(--tx)}
-.sc{max-width:1150px;margin:auto;padding:52px 18px 8px}.sc h2{font-size:clamp(26px,6vw,40px);letter-spacing:-1px;margin-bottom:8px}.sc>p{color:var(--mu);margin-bottom:24px;max-width:560px}
-.fg,.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}.steps{counter-reset:s}
-.fc,.st{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;transition:.25s}.fc:hover{border-color:var(--ac);transform:translateY(-4px)}
-.fi2{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,#0b817633,#0b817633);margin-bottom:12px}
-.fc h3,.st h3{margin-bottom:4px}.fc p,.st p{color:var(--mu)}
+.f1{top:0;right:0}
+.f2{bottom:6px;left:0;animation-delay:-2s}
+.f3{bottom:46px;right:-2px;animation-delay:-3s}
+.f4{top:8px;left:0;font-size:13px;animation-delay:-1s;color:var(--ok);font-weight:600}
+.st{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px;transition:.25s}
+.st h3{margin-bottom:4px}
+.st p{color:var(--mu)}
 .st:before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;font-weight:800;margin-bottom:12px}
-.sec2{display:grid;gap:18px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:24px;padding:26px}.sec2 .lock{font-size:70px;text-align:center}.sec2 ul{list-style:none;display:grid;gap:10px}.sec2 li:before{content:"✓";color:var(--ok);font-weight:800;margin-right:10px}
-.final{text-align:center;max-width:1150px;margin:44px 18px 40px;padding:46px 20px;border-radius:28px;background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}@media(min-width:1182px){.final{margin-inline:auto}}
-.final h2{font-size:clamp(26px,6vw,40px);letter-spacing:-1px}.final p{opacity:.9;margin-top:6px}.final .btn{background:#fff;color:#3b4cca;margin-top:18px;padding:14px 28px}
-.ft2{text-align:center;color:var(--mu);font-size:13px;padding:0 18px calc(30px + env(safe-area-inset-bottom))}
-@media(min-width:900px){.hero2{grid-template-columns:1.05fr .95fr;padding-top:70px}.cta{flex-direction:row;max-width:none}.sec2{grid-template-columns:auto 1fr}}
-@media(max-width:460px){.lg{display:none}.sm{display:inline}}
-
-/* ===== app v2 ===== */
+@media(min-width:900px){.hero2{grid-template-columns:1.05fr .95fr;padding-top:70px}
+.cta{flex-direction:row;max-width:none}}
+@media(max-width:460px){.lg{display:none}
+.sm{display:inline}}
 body{background:radial-gradient(900px 500px at 85% -10%,#0b817622,transparent),radial-gradient(800px 500px at -10% 10%,#0b817622,transparent),var(--bg);background-attachment:fixed}
-#side{background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(14px)}#side .logo{font-size:22px;padding:4px 8px}
-#side nav a{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}#side nav a.on{box-shadow:0 8px 22px #0b817655}
+#side{background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(14px)}
+#side .logo{font-size:22px;padding:4px 8px}
+#side nav a{display:flex;gap:10px;align-items:center;font-weight:600;cursor:pointer}
+#side nav a.on{box-shadow:0 8px 22px #0b817655}
 .meter{background:linear-gradient(135deg,#0b81761f,#0b81761f)}
-.top{backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 78%,transparent)}.top h2{font-size:22px}
-.dh{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:24px;border-radius:26px;color:#fff;background:linear-gradient(135deg,#0b8176,#0b8176);box-shadow:0 18px 50px #0b817640;margin:6px 0 16px;position:relative;overflow:hidden}
-.dh p{opacity:.85}.dh h1{font-size:clamp(24px,6vw,34px);margin:2px 0 14px;letter-spacing:-.5px}
-.dh .av{border:3px solid #fff8;width:72px;height:72px;font-size:30px;z-index:1}.qa{display:flex;gap:8px;flex-wrap:wrap}.qa .btn{margin:0;background:#fff;color:#3b4cca}.qa .btn.ghost{background:#fff2;color:#fff;border-color:#fff6}
-.dg{display:grid;gap:16px;grid-template-columns:1fr}@media(min-width:900px){.dg{grid-template-columns:1.1fr 1fr}}
-.ring{position:relative;width:190px;margin:8px auto 14px}.ring svg{width:100%;display:block}.ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.ring b{font-size:32px;line-height:1}
-.lg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:var(--mu)}.lg2 i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}.lg2 b{color:var(--tx)}
-.stats2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tile{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:.2s;box-shadow:var(--sh)}.tile:hover{transform:translateY(-3px);border-color:var(--c)}
-.tile span{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:color-mix(in srgb,var(--c) 20%,transparent);margin-bottom:6px}.tile b{font-size:30px;line-height:1}
-.sec{font-size:18px;margin:22px 0 10px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
-.chip2{flex:none;padding:8px 14px;border-radius:99px;border:1px solid var(--bd);background:var(--card);cursor:pointer;font-size:14px}.chip2.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border-color:transparent}
-.sbox{position:relative;flex:1;min-width:160px}.sbox span{position:absolute;left:13px;top:50%;translate:0 -50%;pointer-events:none}.tools .sbox input{width:100%;padding-left:40px;border-radius:99px}
-.crumbs{font-size:17px}.crumbs a{padding:4px 8px;border-radius:8px}.crumbs a:hover{background:var(--bd)}
-.it{--k:#0b8176;box-shadow:var(--sh)}.it:hover{transform:translateY(-3px);box-shadow:0 14px 34px color-mix(in srgb,var(--k) 30%,transparent)}
-.k-image{--k:#2ecc8f}.k-video{--k:#ff5c7a}.k-audio{--k:#ffb020}.k-doc{--k:#0b8176}.k-folder{--k:#ffc233}
-.th{background:color-mix(in srgb,var(--k) 16%,var(--bg))!important}.k-folder .th{background:linear-gradient(135deg,#ffc23338,#ff9f1c1f)!important}
-.bd{position:absolute;top:16px;right:16px;background:var(--k);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;text-transform:uppercase;pointer-events:none}.list .bd{top:auto;bottom:10px;right:56px}
+.top{backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 78%,transparent)}
+.top h2{font-size:22px}
+.dg{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.dg{grid-template-columns:1.1fr 1fr}}
+.ring{position:relative;width:190px;margin:8px auto 14px}
+.ring svg{width:100%;display:block}
+.ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring b{font-size:32px;line-height:1}
+.lg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;color:var(--mu)}
+.lg2 i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.lg2 b{color:var(--tx)}
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:.2s;box-shadow:var(--sh)}
+.tile:hover{transform:translateY(-3px);border-color:var(--c)}
+.tile span{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:color-mix(in srgb,var(--c) 20%,transparent);margin-bottom:6px}
+.tile b{font-size:30px;line-height:1}
+.sbox{position:relative;flex:1;min-width:160px}
+.sbox span{position:absolute;left:13px;top:50%;translate:0 -50%;pointer-events:none}
+.tools .sbox input{width:100%;padding-left:40px;border-radius:99px}
+.it{--k:#0b8176;box-shadow:var(--sh)}
+.it:hover{transform:translateY(-3px);box-shadow:0 14px 34px color-mix(in srgb,var(--k) 30%,transparent)}
+.k-image{--k:#2ecc8f}
+.k-video{--k:#ff5c7a}
+.k-audio{--k:#ffb020}
+.k-doc{--k:#0b8176}
+.k-folder{--k:#ffc233}
+.th{background:color-mix(in srgb,var(--k) 16%,var(--bg))!important}
+.k-folder .th{background:linear-gradient(135deg,#ffc23338,#ff9f1c1f)!important}
+.bd{position:absolute;top:16px;right:16px;background:var(--k);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;text-transform:uppercase;pointer-events:none}
+.list .bd{top:auto;bottom:10px;right:56px}
 .it.sel{box-shadow:0 0 0 2px var(--ac)}
-.qr{background:#fff;border-radius:18px;padding:10px;width:max-content;max-width:100%;margin:12px auto}.qr img{display:block;width:250px;max-width:100%}.box a.btn{display:block;text-align:center}
-
-/* ===== compacto + menú hamburguesa ===== */
+.qr{background:#fff;border-radius:18px;padding:10px;width:max-content;max-width:100%;margin:12px auto}
+.qr img{display:block;width:250px;max-width:100%}
+.box a.btn{display:block;text-align:center}
 body{font-size:14px}
-.dh{padding:16px 18px;border-radius:20px;margin:4px 0 12px}.dh h1{font-size:clamp(20px,5vw,26px);margin:0 0 10px}.dh p{font-size:13px}.dh .av{width:52px;height:52px;font-size:22px}.qa .btn{padding:8px 14px;font-size:13px}
-.dg{gap:12px}.card{padding:14px;border-radius:16px}.card h3{font-size:15px}.ring{width:140px;margin:4px auto 10px}.ring b{font-size:24px}.lg2{font-size:12px}
-.stats2{gap:8px}.tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"i n" "i l";align-items:center;gap:0 10px;padding:10px 12px;border-radius:14px}.tile span{grid-area:i;width:36px;height:36px;font-size:18px;margin:0}.tile b{grid-area:n;font-size:20px}.tile small{grid-area:l}
-.sec{font-size:15px;margin:16px 0 8px}
-.grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.grid .it{padding:8px;border-radius:14px}.grid .th{height:84px;font-size:34px;border-radius:10px}.nm{font-size:13px}.mt{font-size:11px}.grid .in{margin-top:6px}
-.list .it{padding:6px 8px 6px 38px}.list .th{width:36px;height:36px;font-size:20px}
-.dots{width:32px;height:32px;font-size:18px}.ck{width:16px!important;height:16px;top:12px;left:12px}.bd{top:12px;right:12px;font-size:9px;padding:1px 6px}
-.top{padding:max(10px,env(safe-area-inset-top)) 16px 8px}.top h2{font-size:18px}.ib{width:38px;height:38px}.av.sm2{width:34px;height:34px;font-size:14px}.upm{display:none}
-.btn{padding:9px 14px}.tools .btn{padding:8px 12px;font-size:13px}.chip2{padding:6px 12px;font-size:13px}.crumbs{font-size:15px}main{padding:4px 16px 40px}
+.dg{gap:12px}
+.card{padding:14px;border-radius:16px}
+.card h3{font-size:15px}
+.ring{width:140px;margin:4px auto 10px}
+.ring b{font-size:24px}
+.lg2{font-size:12px}
+.stats2{gap:8px}
+.tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"i n" "i l";align-items:center;gap:0 10px;padding:10px 12px;border-radius:14px}
+.tile span{grid-area:i;width:36px;height:36px;font-size:18px;margin:0}
+.tile b{grid-area:n;font-size:20px}
+.tile small{grid-area:l}
+.grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.grid .it{padding:8px;border-radius:14px}
+.grid .th{height:84px;font-size:34px;border-radius:10px}
+.nm{font-size:13px}
+.mt{font-size:11px}
+.grid .in{margin-top:6px}
+.list .it{padding:6px 8px 6px 38px}
+.list .th{width:36px;height:36px;font-size:20px}
+.dots{width:32px;height:32px;font-size:18px}
+.bd{top:12px;right:12px;font-size:9px;padding:1px 6px}
+.top{padding:max(10px,env(safe-area-inset-top)) 16px 8px}
+.top h2{font-size:18px}
+.ib{width:38px;height:38px}
+.av.sm2{width:34px;height:34px;font-size:14px}
+.btn{padding:9px 14px}
+.tools .btn{padding:8px 12px;font-size:13px}
+main{padding:4px 16px 40px}
 #side{width:270px;padding:16px 12px;gap:4px;overflow-y:auto}
-.dr-h{display:flex;align-items:center;gap:10px;padding:6px 6px 12px;border-bottom:1px solid var(--bd);margin-bottom:6px}.dr-h .av.big{width:44px;height:44px;font-size:18px}.dr-u{flex:1;min-width:0;display:flex;flex-direction:column}.dr-u b,.dr-u small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dr-h .x{display:none;width:34px;height:34px}
-.dr-q{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 2px}.dr-q .btn{margin:0;padding:9px 6px;font-size:13px;text-align:center}
+.dr-h{display:flex;align-items:center;gap:10px;padding:6px 6px 12px;border-bottom:1px solid var(--bd);margin-bottom:6px}
+.dr-h .av.big{width:44px;height:44px;font-size:18px}
+.dr-u{flex:1;min-width:0;display:flex;flex-direction:column}
+.dr-u b,.dr-u small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dr-h .x{display:none;width:34px;height:34px}
 .dr-s{font-size:12px;color:var(--mu);padding:12px 8px 4px;font-weight:600}
-#side nav{flex:none!important;gap:2px}#side nav a{padding:9px 12px;font-size:14px;gap:10px;display:flex;align-items:center}#side nav a span{width:22px;text-align:center}
-#side nav a em{margin-left:auto;font-style:normal;background:var(--bd);padding:1px 8px;border-radius:99px;font-size:11px}#side nav a.on em{background:#fff3}#side nav a i{font-style:normal}#side nav a.out{color:var(--er)}
+#side nav{flex:none!important;gap:2px}
+#side nav a{padding:9px 12px;font-size:14px;gap:10px;display:flex;align-items:center}
+#side nav a span{width:22px;text-align:center}
+#side nav a em{margin-left:auto;font-style:normal;background:var(--bd);padding:1px 8px;border-radius:99px;font-size:11px}
+#side nav a.on em{background:#fff3}
+#side nav a i{font-style:normal}
+#side nav a.out{color:var(--er)}
 .meter{margin-top:auto}
-@media(max-width:800px){
-#side{display:flex!important;transform:translateX(-100%);width:min(300px,84vw);box-shadow:var(--sh)}#side.open{transform:none}
-#ov{display:none!important}#ov.on{display:block!important}
-.burger{display:block!important}.top .btn.dsk{display:none}.upm{display:grid}.dr-h .x{display:block}
-.mainw{margin-left:0}main{padding:4px 12px 40px}#ups{bottom:12px}.grid{grid-template-columns:repeat(2,1fr)}
-}
-
-/* ===== Storcloud: color firme, iconos y menú ===== */
+@media(max-width:800px){#side{display:flex!important;transform:translateX(-100%);width:min(300px,84vw);box-shadow:var(--sh)}
+#side.open{transform:none}
+#ov{display:none!important}
+#ov.on{display:block!important}
+.burger{display:block!important}
+.dr-h .x{display:block}
+.mainw{margin-left:0}
+main{padding:4px 12px 40px}
+#ups{bottom:12px}
+.grid{grid-template-columns:repeat(2,1fr)}}
 .i{flex:none;display:block}
 a{color:var(--lk)}
 body{background:var(--bg);font-size:14px}
 input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 25%,transparent)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--ac);box-shadow:none;border-radius:12px}
-.btn:hover{filter:brightness(1.12)}.btn.ghost{background:transparent;color:var(--tx)}.btn.er{background:#c93b3b;color:#fff}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--tx)}
+.btn.er{background:#c93b3b;color:#fff}
 .btn svg{margin:0}
 .ib{display:grid;place-items:center;color:var(--tx);border-radius:12px}
 .logo{display:inline-flex;align-items:center;gap:10px;letter-spacing:-.3px}
@@ -220,12 +278,13 @@ input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(i
 .top{background:color-mix(in srgb,var(--bg) 92%,transparent);border-bottom:1px solid var(--bd);margin-bottom:12px}
 .top h2{font-size:18px;font-weight:700}
 .top .btn.upb{display:inline-flex!important;padding:9px 16px}
-.tb .tools:only-child{width:100%}.tb .tools:only-child .sbox{max-width:560px}
+.tb .tools:only-child{width:100%}
+.tb .tools:only-child .sbox{max-width:560px}
 .sbox span{display:grid;color:var(--mu)}
-/* menú lateral / hamburguesa */
 #side{width:270px;background:var(--card);backdrop-filter:none;border-right:1px solid var(--bd);padding:16px 12px;gap:2px}
 .dr-b{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 14px}
-.dr-b .logo{font-size:20px;padding:0}.dr-b .x{display:none}
+.dr-b .logo{font-size:20px;padding:0}
+.dr-b .x{display:none}
 .dr-h{border:1px solid var(--bd);border-radius:14px;padding:10px;margin:0 0 6px;background:var(--bg)}
 .dr-s{font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:14px 12px 6px}
 #side nav a{padding:11px 12px;border-radius:12px;color:var(--mu);font-weight:600;gap:12px}
@@ -234,64 +293,70 @@ input:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(i
 #side nav a.on{background:var(--ac);color:#fff;box-shadow:none}
 #side nav a.on em{background:#ffffff33;color:#fff}
 #side nav a.out,#side nav a.out:hover{color:var(--er)}
-.meter{background:var(--bg);margin-top:auto}.bar i{background:var(--ac)}
+.meter{background:var(--bg);margin-top:auto}
+.bar i{background:var(--ac)}
 .mainw{margin-left:270px}
-@media(max-width:800px){.mainw{margin-left:0}.dr-b .x{display:grid}}
-/* archivos */
+@media(max-width:800px){.mainw{margin-left:0}
+.dr-b .x{display:grid}}
 .it{--k:#a78bfa;box-shadow:none}
-.k-image{--k:#34d399}.k-video{--k:#fb7185}.k-audio{--k:#fbbf24}.k-doc{--k:#60a5fa}.k-folder{--k:#fbbf24}
+.k-image{--k:#34d399}
+.k-video{--k:#fb7185}
+.k-audio{--k:#fbbf24}
+.k-doc{--k:#60a5fa}
+.k-folder{--k:#fbbf24}
 .k-folder .th{background:color-mix(in srgb,var(--k) 16%,var(--bg))!important}
 .it:hover{transform:none;border-color:var(--ac);box-shadow:0 8px 24px color-mix(in srgb,var(--k) 18%,transparent)}
 .it.sel{background:color-mix(in srgb,var(--ac) 14%,var(--card));border-color:var(--ac);box-shadow:none}
-.th>svg{width:34px;height:34px;color:var(--k)}.list .th>svg{width:20px;height:20px}
-.bigic{display:grid;place-items:center}.bigic>svg{width:72px;height:72px;color:var(--ac)}
+.th>svg{width:34px;height:34px;color:var(--k)}
+.list .th>svg{width:20px;height:20px}
+.bigic{display:grid;place-items:center}
+.bigic>svg{width:72px;height:72px;color:var(--ac)}
 .grid .th{height:96px}
 .dots{display:grid;place-items:center;color:var(--mu)}
-.bd{color:#fff}.k-audio .bd,.k-folder .bd{color:#2a1f00}
-.ck{appearance:none;-webkit-appearance:none;padding:0;border:2px solid #fff;border-radius:50%;background:#0006;width:20px!important;height:20px;top:14px;left:14px}
-.ck:checked{background:var(--ac);border-color:var(--ac)}
-.ck:checked::after{content:"";display:block;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:translate(5px,1px) rotate(45deg)}
-.chip2{background:var(--card);color:var(--mu);font-weight:600}
-.chip2.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.bd{color:#fff}
+.k-audio .bd,.k-folder .bd{color:#2a1f00}
 .empty>div svg{margin:0 auto 8px;color:var(--ac)}
 .pop button{display:flex;align-items:center;gap:10px}
 .box a.btn{display:flex}
 .tile span{color:var(--c)}
-.sto .ring{width:190px}.sto .ring b{font-size:30px}
-.toast{border-color:var(--ac)}.toast.er{border-color:var(--er)}
-/* landing */
+.sto .ring{width:190px}
+.sto .ring b{font-size:30px}
+.toast{border-color:var(--ac)}
+.toast.er{border-color:var(--er)}
 .hero2:before{background:radial-gradient(500px 280px at 30% 25%,color-mix(in srgb,var(--ac) 30%,transparent),transparent)}
 .chip{color:var(--lk);border-color:color-mix(in srgb,var(--ac) 50%,var(--bd))}
 .ht h1 em{color:var(--lk);background:none;-webkit-background-clip:initial;background-clip:initial}
-.wf{align-items:center}.wf svg,.fl svg{color:var(--lk)}
-.fl{display:inline-flex;align-items:center;gap:6px;font-size:13px}.f4 svg{color:var(--ok)}
-.fi2{background:color-mix(in srgb,var(--ac) 20%,transparent);color:var(--lk)}
-.sec2 .lock{display:grid;place-items:center;color:var(--lk)}
-.final{background:var(--ac)}.final .btn{background:#fff;color:var(--ac)}
-
-/* ===== ajustes v3 ===== */
+.wf{align-items:center}
+.wf svg,.fl svg{color:var(--lk)}
+.fl{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.f4 svg{color:var(--ok)}
 #side nav.lo{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
-.meter{cursor:pointer;transition:.2s}.meter:hover,.meter.on{border-color:var(--ac)}
+.meter{cursor:pointer;transition:.2s}
+.meter:hover,.meter.on{border-color:var(--ac)}
 .list.shr .it{display:grid;grid-template-columns:auto 1fr;gap:10px 12px;padding:12px;align-items:center}
-.list.shr .it .in{min-width:0}.list.shr .it .nm{white-space:normal;word-break:break-all}
-.ra{grid-column:1/-1;display:flex;gap:8px}.ra .btn{flex:1;min-width:0;margin:0;padding:9px 8px;font-size:13px}
-.list.shr .it.tr{cursor:default}.list.shr .it.tr:hover{border-color:var(--bd);box-shadow:none}
-@media(min-width:700px){.list.shr .it{grid-template-columns:auto 1fr auto}.ra{grid-column:auto}.ra .btn{flex:none;padding:9px 14px}}
-
-/* ===== ajustes v4 ===== */
+.list.shr .it .in{min-width:0}
+.list.shr .it .nm{white-space:normal;word-break:break-all}
+.ra{grid-column:1/-1;display:flex;gap:8px}
+.ra .btn{flex:1;min-width:0;margin:0;padding:9px 8px;font-size:13px}
+.list.shr .it.tr{cursor:default}
+.list.shr .it.tr:hover{border-color:var(--bd);box-shadow:none}
+@media(min-width:700px){.list.shr .it{grid-template-columns:auto 1fr auto}
+.ra{grid-column:auto}
+.ra .btn{flex:none;padding:9px 14px}}
 .it,.it:hover{cursor:default;transform:none;border-color:var(--bd);box-shadow:none}
-.sep{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:12px;margin:14px 0 6px}.sep:before,.sep:after{content:"";flex:1;height:1px;background:var(--bd)}
-.authb .btn.big{margin:5px 0}.authb select{margin:6px 0}
+.sep{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:12px;margin:14px 0 6px}
+.sep:before,.sep:after{content:"";flex:1;height:1px;background:var(--bd)}
+.authb .btn.big{margin:5px 0}
+.authb select{margin:6px 0}
 .vi{color:var(--ac);display:grid;place-items:center;margin:16px 0 4px}
 #rc{height:0}
 </style></head>
-<body><div id="app"><div class="load"><span class="lm big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></span></div></div><noscript><h1>Storcloud, almacenamiento de archivos en la nube</h1><p>Storcloud es tu espacio de almacenamiento de archivos en la nube: guarda fotos, videos y documentos, descárgalos desde cualquier dispositivo y compártelos con un enlace o código QR. 10 GB gratis.</p></noscript><input type="file" id="fi" multiple hidden><div id="ups"></div><div id="toasts"></div>
+<body><div id="app"><div class="load"><span class="lm big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></span></div></div><input type="file" id="fi" multiple hidden><div id="ups"></div><div id="toasts"></div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,updateProfile,updatePassword,GoogleAuthProvider,GithubAuthProvider,signInWithPopup,signInWithRedirect,RecaptchaVerifier,signInWithPhoneNumber,sendEmailVerification}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import{getFirestore,collection,doc,setDoc,getDoc,addDoc,updateDoc,deleteDoc,onSnapshot,query,where,serverTimestamp,increment}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ===== CONFIGURACIÓN ===== */
 const firebaseConfig={
   apiKey:"AIzaSyAWr9YM0YAG0mx0SEk3qNEhjeS1MOu_2lg",
   authDomain:"kendy-57bcd.firebaseapp.com",
@@ -301,9 +366,7 @@ const firebaseConfig={
   appId:"1:678778497788:web:1e26e4c5be5c60f2f98579",
   measurementId:"G-KKW9TV2H8J"
 };
-/* Cloudinary (preset en modo "Unsigned") */
 const CLOUD_NAME="dkryox5u",CLOUD_PRESET="KendyR";
-/* ================================================================================================ */
 const fb=initializeApp(firebaseConfig),auth=getAuth(fb),db=getFirestore(fb);auth.languageCode='es';
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -349,7 +412,7 @@ const KI={image:'image',video:'video',audio:'music',doc:'file',other:'archive'};
 const ext=n=>n.includes('.')?n.split('.').pop().toLowerCase():'';
 const kind=f=>f.isFolder?'folder':EXT[ext(f.name)]||'other';
 const icon=f=>ico(f.isFolder?'folder':KI[kind(f)]||'archive',30);
-const S={user:undefined,profile:null,files:[],shares:[],loaded:false,page:'landing',view:'dash',parent:'root',q:'',filter:'all',sort:'date',grid:true,sel:new Set(),urls:{}};
+const S={user:undefined,profile:null,files:[],shares:[],loaded:false,page:'landing',view:'dash',parent:'root',q:'',filter:'all',sort:'date',grid:true,urls:{}};
 const byId=id=>S.files.find(f=>f.id===id),quota=()=>S.profile?.quota||QUOTA,used=()=>S.files.reduce((a,f)=>a+(f.isFolder?0:f.size||0),0);
 const fd=t=>new Date(t).toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'});
 const slug=n=>String(n||'archivo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w.\-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'archivo';
@@ -363,66 +426,54 @@ const modal=(title,body,ok='Aceptar')=>new Promise(r=>{const m=document.createEl
 const copy=t=>navigator.clipboard.writeText(t).then(()=>toast('Enlace copiado'),()=>prompt('Copia el enlace:',t));
 const setTheme=d=>{document.documentElement.dataset.theme=d?'dark':'light';localStorage.setItem('mc-theme',d?'dark':'light')};
 const skel=n=>`<div class="grid">${'<div class="sk"></div>'.repeat(n)}</div>`;
-const empty=(t='Todavía no tienes archivos',p='Sube tu primer archivo para comenzar.',b=0)=>`<div class="empty"><div>${ico('cloud',54)}</div><h3>${t}</h3><p>${p}</p>${b?'<button class="btn" data-a="pick">Subir archivo</button>':''}</div>`;
+const empty=(t='Todavía no tienes archivos')=>`<div class="empty"><div>${ico('cloud',54)}</div><h3>${t}</h3></div>`;
 const av=()=>S.profile?.photo?`<img referrerpolicy="no-referrer" src="${esc(S.profile.photo)}" alt="">`:esc((S.profile?.name||S.user?.displayName||'U')[0].toUpperCase());
 const mp=d=>{const x=d.data({serverTimestamps:'estimate'});return{...x,id:d.id,t:x.createdAt?.toMillis?.()||Date.now()}};
 const url=async id=>byId(id).url;
 async function dl(name,u){try{const r=await fetch(u);if(!r.ok)throw 0;const o=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=o;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(o),9e3)}catch{window.open(u,'_blank','noopener')}}
 
-/* ---------- Vistas ---------- */
-const NAV=[['dash','home','Inicio'],['files','folder','Mis archivos'],['shared','link','Compartidos'],['trash','trash','Papelera'],['storage','pie','Almacenamiento'],['acct','user','Perfil y ajustes']];
+const NAV=[['dash','home','Inicio'],['shared','link','Compartidos'],['trash','trash','Papelera'],['storage','pie','Almacenamiento'],['acct','user','Perfil y ajustes']];
 function landing(){const R='data-a="go" data-id="register"';return`<header class="nav"><span class="logo">${brand()}</span><div class="na"><button class="btn ghost" data-a="go" data-id="login"><span class="lg">Iniciar sesión</span><span class="sm">Entrar</span></button><button class="btn" ${R}>Crear cuenta</button></div></header>
-<section class="hero2"><div class="ht"><span class="chip">10 GB gratis · Sin tarjeta</span><h1>Tu nube.<br>Tus archivos.<br><em>En cualquier lugar.</em></h1><p>Guarda fotos, videos y documentos, organízalos en carpetas y compártelos con un enlace. Desde tu celular o tu computadora.</p><div class="cta"><button class="btn big" ${R}>Crear cuenta gratis</button><button class="btn ghost big" data-a="google"><b style="color:#4285f4">G</b> Continuar con Google</button></div><small>¿Ya tienes cuenta? <a data-a="go" data-id="login">Inicia sesión</a></small></div>
+<section class="hero2"><div class="ht"><span class="chip">10 GB gratis · Sin tarjeta</span><h1>Tu nube.<br>Tus archivos.<br><em>En cualquier lugar.</em></h1><p>Guarda tus fotos, videos y documentos y compártelos con un enlace.</p><div class="cta"><button class="btn big" ${R}>Crear cuenta gratis</button><button class="btn ghost big" data-a="google"><b style="color:#4285f4">G</b> Continuar con Google</button></div><small>¿Ya tienes cuenta? <a data-a="go" data-id="login">Inicia sesión</a></small></div>
 <div class="hv" aria-hidden="true"><div class="win"><div class="wb"><i></i><i></i><i></i><span>Storcloud</span></div><div class="wg"><div class="wf">${ico('folder',28)}<b>Vacaciones</b></div><div class="wf">${ico('folder',28)}<b>Trabajo</b></div><div class="wf">${ico('folder',28)}<b>Música</b></div><div class="wf">${ico('image',28)}<b>foto.jpg</b></div><div class="wf">${ico('video',28)}<b>video.mp4</b></div><div class="wf">${ico('file',28)}<b>informe.pdf</b></div></div><div class="wu"><small>Subiendo video.mp4</small><div class="bar"><i></i></div></div></div><span class="fl f1">${ico('video',20)}</span><span class="fl f2">${ico('music',20)}</span><span class="fl f3">${ico('file',20)}</span><span class="fl f4">${ico('link',14)}Enlace copiado</span></div></section>
-<div class="band"><div><b>10 GB</b>de espacio gratis</div><div><b>Todos</b>los formatos de archivo</div><div><b>Tú decides</b>quién ve tus enlaces</div></div>
-<section class="sc"><h2>Todo lo que necesitas para tus archivos</h2><p>Simple de usar, pensado para que lo manejes cómodo desde el celular.</p><div class="fg">${[['cloud','Almacenamiento en la nube','10 GB gratis para todo lo que quieras guardar.'],['link','Compartir archivos','Crea un enlace público y desactívalo cuando quieras. Mira cuántas veces se descargó.'],['folder','Carpetas','Organiza con carpetas y subcarpetas. Mueve y renombra con un toque.'],['download','Descargas','Descarga tus archivos desde cualquier dispositivo.'],['eye','Vista previa','Mira imágenes, videos, audios y PDF sin descargarlos.'],['lock','Seguridad','Tus archivos privados solo los ves tú, protegidos por reglas de Firebase.']].map(([i,t,d])=>`<div class="fc"><div class="fi2">${ico(i,26)}</div><h3>${t}</h3><p>${d}</p></div>`).join('')}</div></section>
-<section class="sc"><h2>Empieza en tres pasos</h2><p>En menos de un minuto ya estás guardando archivos.</p><div class="steps"><div class="st"><h3>Crea tu cuenta</h3><p>Con tu correo o con Google, sin tarjeta.</p></div><div class="st"><h3>Sube tus archivos</h3><p>Toca el botón Subir o arrástralos. Puedes subir varios a la vez.</p></div><div class="st"><h3>Comparte con un enlace</h3><p>Copia el enlace y envíalo por donde quieras.</p></div></div></section>
-<section class="sc"><div class="sec2"><div class="lock">${ico('lock',72)}</div><div><h2>Tus archivos, solo tuyos</h2><ul><li>Nadie más ve tus archivos privados.</li><li>Los enlaces que compartes los activas y desactivas tú.</li><li>Inicia sesión con tu correo o con tu cuenta de Google.</li></ul></div></div></section>
-<section class="final"><h2>Tu nube te está esperando</h2><p>Crea tu cuenta gratis y sube tu primer archivo hoy.</p><button class="btn" ${R}>Crear cuenta gratis</button></section>
-<footer class="ft2">© Storcloud · Tu nube. Tus archivos. En cualquier lugar.</footer>`}
+`}
 const CC=`AR|Argentina|54;DE|Alemania|49;DZ|Argelia|213;SA|Arabia Saudita|966;AU|Australia|61;AT|Austria|43;BD|Bangladés|880;BE|Bélgica|32;BZ|Belice|501;BO|Bolivia|591;BR|Brasil|55;CA|Canadá|1;CL|Chile|56;CN|China|86;CO|Colombia|57;KR|Corea del Sur|82;CR|Costa Rica|506;CU|Cuba|53;DK|Dinamarca|45;EC|Ecuador|593;EG|Egipto|20;SV|El Salvador|503;AE|Emiratos Árabes Unidos|971;ES|España|34;US|Estados Unidos|1;PH|Filipinas|63;FI|Finlandia|358;FR|Francia|33;GH|Ghana|233;GR|Grecia|30;GT|Guatemala|502;GY|Guyana|592;GQ|Guinea Ecuatorial|240;HT|Haití|509;HN|Honduras|504;IN|India|91;ID|Indonesia|62;IE|Irlanda|353;IL|Israel|972;IT|Italia|39;JM|Jamaica|1;JP|Japón|81;KE|Kenia|254;MY|Malasia|60;MA|Marruecos|212;MX|México|52;NI|Nicaragua|505;NG|Nigeria|234;NO|Noruega|47;NZ|Nueva Zelanda|64;NL|Países Bajos|31;PK|Pakistán|92;PA|Panamá|507;PY|Paraguay|595;PE|Perú|51;PL|Polonia|48;PT|Portugal|351;PR|Puerto Rico|1;GB|Reino Unido|44;DO|República Dominicana|1;RO|Rumania|40;RU|Rusia|7;SG|Singapur|65;ZA|Sudáfrica|27;SE|Suecia|46;CH|Suiza|41;SR|Surinam|597;TH|Tailandia|66;TT|Trinidad y Tobago|1;TR|Turquía|90;UA|Ucrania|380;UY|Uruguay|598;VE|Venezuela|58;VN|Vietnam|84`.split(';').map(x=>x.split('|'));
 async function phoneE164(iso,raw){const c=CC.find(x=>x[0]===iso);let lib;try{lib=await import('https://cdn.jsdelivr.net/npm/libphonenumber-js@1/+esm')}catch{}
 if(lib){const pn=lib.parsePhoneNumberFromString(raw,iso);return pn&&pn.isValid()&&pn.country===iso?pn.number:null}
 const d=raw.replace(/\D/g,'').replace(/^0+/,'');return d.length>=6&&d.length<=12?'+'+c[2]+d:null}
 function phonePage(){try{S.rv?.clear()}catch{}S.rv=null;const st=S.ph||{step:1},g=((navigator.language||'').split('-')[1]||'').toUpperCase(),sel=st.iso||(CC.some(c=>c[0]===g)?g:'US');
-const body=st.step===1?`<h2>Continuar con teléfono</h2><p class="mu">Te enviaremos un código por SMS para verificar tu número.</p><input id="nm" placeholder="Tu nombre (opcional)" autocomplete="name" value="${esc(st.nm||'')}"><select id="cc">${CC.map(c=>`<option value="${c[0]}" ${c[0]===sel?'selected':''}>${c[1]} (+${c[2]})</option>`).join('')}</select><input id="ph" type="tel" inputmode="tel" placeholder="Número de teléfono" autocomplete="tel-national" value="${esc(st.raw||'')}"><div id="err" class="er"></div><button id="sub" class="btn big" data-a="phsend">Enviar código</button><div class="lk"><a data-a="go" data-id="login">Volver</a></div>`
-:`<h2>Verifica tu número</h2><p class="mu">Enviamos un código de 6 dígitos por SMS a <b>${esc(st.e164)}</b>.</p><input id="code" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" autocomplete="one-time-code"><div id="err" class="er"></div><button id="sub" class="btn big" data-a="phverify">Verificar y entrar</button><div class="lk"><a data-a="phback">Cambiar número</a><a data-a="phresend">Reenviar código</a></div>`;
+const body=st.step===1?`<h2>Continuar con teléfono</h2><input id="nm" placeholder="Tu nombre (opcional)" autocomplete="name" value="${esc(st.nm||'')}"><select id="cc">${CC.map(c=>`<option value="${c[0]}" ${c[0]===sel?'selected':''}>${c[1]} (+${c[2]})</option>`).join('')}</select><input id="ph" type="tel" inputmode="tel" placeholder="Número de teléfono" autocomplete="tel-national" value="${esc(st.raw||'')}"><div id="err" class="er"></div><button id="sub" class="btn big" data-a="phsend">Enviar código</button><div class="lk"><a data-a="go" data-id="login">Volver</a></div>`
+:`<h2>Verifica tu número</h2><p class="mu">Código enviado a <b>${esc(st.e164)}</b>.</p><input id="code" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" autocomplete="one-time-code"><div id="err" class="er"></div><button id="sub" class="btn big" data-a="phverify">Verificar y entrar</button><div class="lk"><a data-a="phback">Cambiar número</a><a data-a="phresend">Reenviar código</a></div>`;
 $('#app').innerHTML=`<div class="authw"><div class="authb"><a class="logo" data-a="go" data-id="landing">${brand()}</a>${body}<div id="rc"></div></div></div>`}
-function verifyPage(){const u=S.user;$('#app').innerHTML=`<div class="authw"><div class="authb" style="text-align:center"><span class="logo">${brand()}</span><div class="vi">${ico('mail',44)}</div><h2>Verifica tu correo</h2><p class="mu">Enviamos un enlace de verificación a <b>${esc(u.email)}</b>. Ábrelo y vuelve aquí. Así protegemos tus archivos.</p><div id="err" class="er"></div><button id="sub" class="btn big" data-a="vdone">Ya verifiqué mi correo</button><button class="btn ghost big" data-a="vresend">Reenviar correo</button><div class="lk"><a data-a="out">Cerrar sesión</a></div></div></div>`}
+function verifyPage(){const u=S.user;$('#app').innerHTML=`<div class="authw"><div class="authb" style="text-align:center"><span class="logo">${brand()}</span><div class="vi">${ico('mail',44)}</div><h2>Verifica tu correo</h2><p class="mu">Enlace enviado a <b>${esc(u.email)}</b>. Ábrelo y vuelve aquí.</p><div id="err" class="er"></div><button id="sub" class="btn big" data-a="vdone">Ya verifiqué mi correo</button><button class="btn ghost big" data-a="vresend">Reenviar correo</button><div class="lk"><a data-a="out">Cerrar sesión</a></div></div></div>`}
 function authPages(){const m=S.page;if(m==='landing'){$('#app').innerHTML=landing();return}
 if(m==='phone')return phonePage();
-const T={login:['Iniciar sesión','Bienvenido de nuevo'],register:['Crear cuenta','Empieza con 10 GB gratis'],reset:['Recuperar contraseña','Te enviaremos un enlace por correo']}[m];
-$('#app').innerHTML=`<div class="authw"><div class="authb"><a class="logo" data-a="go" data-id="landing">${brand()}</a><h2>${T[0]}</h2><p class="mu">${T[1]}</p>${m==='register'?'<input id="nm" placeholder="Nombre" autocomplete="name">':''}<input id="em" type="email" placeholder="Email" autocomplete="email">${m!=='reset'?`<input id="pw" type="password" placeholder="Contraseña" autocomplete="${m==='login'?'current-password':'new-password'}">`:''}${m==='register'?'<input id="pw2" type="password" placeholder="Confirmar contraseña" autocomplete="new-password">':''}<div id="err" class="er"></div><button id="sub" class="btn big" data-a="auth" data-id="${m}">${T[0]}</button>${m!=='reset'?`<div class="sep"><span>o continúa con</span></div><button class="btn ghost big" data-a="google"><b style="color:#4285f4">G</b> Continuar con Google</button><button class="btn ghost big" data-a="github">${ico('github',18)} Continuar con GitHub</button><button class="btn ghost big" data-a="go" data-id="phone">${ico('phone',18)} Continuar con teléfono</button>`:''}<div class="lk">${m!=='login'?'<a data-a="go" data-id="login">Iniciar sesión</a>':''}${m!=='register'?'<a data-a="go" data-id="register">Crear cuenta</a>':''}${m==='login'?'<a data-a="go" data-id="reset">Recuperar contraseña</a>':''}</div></div></div>`}
+const T={login:['Iniciar sesión'],register:['Crear cuenta'],reset:['Recuperar contraseña']}[m];
+$('#app').innerHTML=`<div class="authw"><div class="authb"><a class="logo" data-a="go" data-id="landing">${brand()}</a><h2>${T[0]}</h2>${m==='register'?'<input id="nm" placeholder="Nombre" autocomplete="name">':''}<input id="em" type="email" placeholder="Email" autocomplete="email">${m!=='reset'?`<input id="pw" type="password" placeholder="Contraseña" autocomplete="${m==='login'?'current-password':'new-password'}">`:''}${m==='register'?'<input id="pw2" type="password" placeholder="Confirmar contraseña" autocomplete="new-password">':''}<div id="err" class="er"></div><button id="sub" class="btn big" data-a="auth" data-id="${m}">${T[0]}</button>${m!=='reset'?`<div class="sep"><span>o continúa con</span></div><button class="btn ghost big" data-a="google"><b style="color:#4285f4">G</b> Continuar con Google</button><button class="btn ghost big" data-a="github">${ico('github',18)} Continuar con GitHub</button><button class="btn ghost big" data-a="go" data-id="phone">${ico('phone',18)} Continuar con teléfono</button>`:''}<div class="lk">${m!=='login'?'<a data-a="go" data-id="login">Iniciar sesión</a>':''}${m!=='register'?'<a data-a="go" data-id="register">Crear cuenta</a>':''}${m==='login'?'<a data-a="go" data-id="reset">Recuperar contraseña</a>':''}</div></div></div>`}
 function shell(){const nm=esc(S.profile?.name||S.user.displayName||'Usuario'),cnt=S.files.filter(x=>x.trashed&&live(x)).length,ns=S.shares.filter(s=>s.active).length,dark=document.documentElement.dataset.theme==='dark',cur=NAV.find(x=>x[0]===S.view)||NAV[0];
 const L=(k,b)=>{const n=NAV.find(x=>x[0]===k);return`<a class="${S.view===k?'on':''}" data-a="view" data-id="${k}"><span>${ico(n[1],19)}</span><i>${n[2]}</i>${b?`<em>${b}</em>`:''}</a>`};
 $('#app').innerHTML=`<div id="ov" data-a="burger"></div><aside id="side"><div class="dr-b"><span class="logo">${brand()}</span><button class="ib x" data-a="burger" aria-label="Cerrar menú">${ico('close',20)}</button></div><div class="dr-h"><span class="av big" id="av2"></span><div class="dr-u"><b>${nm}</b><small>${esc(S.user.email||S.user.phoneNumber||'')}</small></div></div><div class="dr-s">Menú</div><nav>${L('dash')}${L('shared',ns||'')}${L('trash',cnt||'')}</nav><nav class="lo"><a class="out" data-a="out"><span>${ico('logout',19)}</span><i>Cerrar sesión</i></a></nav><div class="meter${S.view==='storage'?' on':''}" id="usage" data-a="view" data-id="storage"></div></aside><div class="mainw"><header class="top"><button class="ib burger" data-a="burger" aria-label="Menú">${ico('menu',22)}</button><h2>${cur[2]}</h2><div class="sp"></div>${S.view==='dash'||S.view==='files'?`<button class="btn upb" data-a="pick">${ico('upload',17)}<span>Subir</span></button>`:''}<span class="av sm2" id="av" data-a="view" data-id="acct"></span></header><main id="main"></main></div>`;usageUpd();renderMain()}
 function usageUpd(){const u=used(),q=quota();if($('#usage'))$('#usage').innerHTML=`<small>Almacenamiento</small><b>${sz(u)} / ${sz(q)}</b><div class="bar"><i style="width:${Math.min(100,u/q*100)}%"></i></div>`;if($('#av'))$('#av').innerHTML=av();if($('#av2'))$('#av2').innerHTML=av()}
 const card=f=>{const k=kind(f),e=ext(f.name);return`<div class="it k-${k}"><div class="th" ${k==='image'?`data-th="${f.id}"`:''}>${icon(f)}</div>${!f.isFolder&&e?`<span class="bd">${esc(e.slice(0,4))}</span>`:''}<div class="in"><div class="nm">${esc(f.name)}</div><div class="mt">${f.isFolder?'Carpeta':sz(f.size)} · ${fd(f.t)}${S.shares.some(s=>s.id===f.id&&s.active)?' · Compartido':''}</div></div><button class="dots" data-a="menu" data-id="${f.id}" aria-label="Opciones">${ico('more',20)}</button></div>`};
-const CH=[['all','Todo'],['image','Imágenes'],['video','Videos'],['audio','Audio'],['doc','Documentos'],['other','Otros']];
-const chipsH=()=>`<div class="chips">${CH.map(([k,l])=>`<button class="chip2${S.filter===k?' on':''}" data-a="flt" data-id="${k}">${l}</button>`).join('')}</div>`;
 const toolsH=()=>`<div class="sbox"><span>${ico('search',16)}</span><input id="q" type="search" placeholder="Buscar" value="${esc(S.q)}"></div><select id="srt">${[['date','Fecha'],['name','Nombre'],['size','Tamaño'],['type','Tipo']].map(([k,l])=>`<option value="${k}" ${S.sort===k?'selected':''}>${l}</option>`).join('')}</select><button class="ib" data-a="grid" title="Cambiar vista" aria-label="Cambiar vista">${ico(S.grid?'list':'grid',19)}</button>`;
 const V={
-dash(){return`<div class="tb"><div class="tools">${toolsH()}</div></div><div id="selbar"></div><div id="list"></div>`},
+dash(){return`<div class="tb"><div class="tools">${toolsH()}</div></div><div id="list"></div>`},
 storage(){const f=S.files.filter(x=>!x.trashed&&live(x)),fl=f.filter(x=>!x.isFolder),u=used(),q=quota(),pct=Math.min(100,u/q*100);
 const by={image:0,video:0,audio:0,doc:0,other:0},NM={image:['Imágenes','#34d399'],video:['Videos','#fb7185'],audio:['Audio','#fbbf24'],doc:['Documentos','#60a5fa'],other:['Otros','#a78bfa']};fl.forEach(x=>by[kind(x)]+=x.size||0);
 const C=2*Math.PI*52;let off=0;const segs=Object.keys(by).map(k=>{const l=u?Math.min(by[k]/q*C,C):0,s=`<circle r="52" cx="70" cy="70" fill="none" stroke="${NM[k][1]}" stroke-width="16" stroke-dasharray="${l} ${C-l}" stroke-dashoffset="${-off}" transform="rotate(-90 70 70)"/>`;off+=l;return s}).join('');
-const tiles=[['folder','Carpetas',f.length-fl.length,'files','#fbbf24'],['file','Archivos',fl.length,'files','#60a5fa'],['link','Enlaces activos',S.shares.filter(s=>s.active).length,'shared','#34d399'],['trash','En papelera',S.files.filter(x=>x.trashed&&live(x)).length,'trash','#fb7185']];
+const tiles=[['file','Archivos',fl.length,'dash','#60a5fa'],['link','Enlaces activos',S.shares.filter(s=>s.active).length,'shared','#34d399'],['trash','En papelera',S.files.filter(x=>x.trashed&&live(x)).length,'trash','#fb7185']];
 return`<div class="dg"><div class="card sto"><h3>Uso de almacenamiento</h3><div class="ring"><svg viewBox="0 0 140 140"><circle r="52" cx="70" cy="70" fill="none" stroke="var(--bd)" stroke-width="16"/>${segs}</svg><div><b>${pct.toFixed(pct<10?1:0)}%</b><small>${sz(u)} de ${sz(q)}</small></div></div><div class="lg2">${Object.keys(by).map(k=>`<span><i style="background:${NM[k][1]}"></i>${NM[k][0]} <b>${sz(by[k])}</b></span>`).join('')}</div></div><div class="stats2">${tiles.map(([i,l,c,v,col])=>`<div class="tile" style="--c:${col}" data-a="view" data-id="${v}"><span>${ico(i,20)}</span><b>${c}</b><small>${l}</small></div>`).join('')}</div></div>`},
-files(){return`<div class="tb"><div id="crumbs" class="crumbs"></div><div class="tools">${toolsH()}<button class="btn ghost" data-a="newf">${ico('folderplus',17)}<span>Carpeta</span></button></div></div><div id="selbar"></div><div id="list"></div>`},
-shared(){return S.shares.length?`<div class="list shr">${S.shares.map(s=>`<div class="it"><div class="th">${icon({name:s.name})}</div><div class="in"><div class="nm">${esc(s.name)}</div><div class="mt">${s.active?'Activo':'Desactivado'} · ${s.downloads||0} descargas · ${sz(s.size)}</div></div><div class="ra"><button class="btn ghost" data-a="qr" data-id="${s.id}">${ico('qr',16)}<span>QR</span></button><button class="btn ghost" data-a="cp" data-id="${s.id}">Copiar enlace</button><button class="btn ghost" data-a="tog" data-id="${s.id}">${s.active?'Desactivar':'Activar'}</button></div></div>`).join('')}</div>`:empty('Aún no compartes nada','Comparte un archivo desde el menú de opciones en Inicio.',0)},
-trash(){const a=S.files.filter(f=>f.trashed&&live(f)).sort((x,y)=>y.t-x.t);return`<div class="tb"><p class="mu">Los archivos se eliminan solos a los 15 días. Mientras tanto siguen ocupando espacio.</p>${a.length?'<button class="btn er" data-a="empty">Vaciar papelera</button>':''}</div>${!S.loaded?skel(4):a.length?`<div class="list shr">${a.map(f=>`<div class="it tr k-${kind(f)}"><div class="th">${icon(f)}</div><div class="in"><div class="nm">${esc(f.name)}</div><div class="mt">${sz(f.size)} · ${dleft(f)}</div></div><div class="ra"><button class="btn ghost" data-a="restore" data-id="${f.id}">${ico('restore',16)}<span>Restaurar</span></button><button class="btn er" data-a="purge1" data-id="${f.id}">${ico('trash',16)}<span>Eliminar</span></button></div></div>`).join('')}</div>`:empty('La papelera está vacía','Los archivos eliminados aparecerán aquí.',0)}`},
-acct(){const p=S.profile||{},u=S.user;return`<div class="two"><div class="card"><h3>Perfil</h3><div class="hi"><span class="av big">${av()}</span><button class="btn ghost" data-a="photo">Cambiar foto</button></div><label>Nombre</label><input id="pn" value="${esc(p.name||u.displayName||'')}"><button class="btn" data-a="saven">Guardar nombre</button><p class="mu">${u.email?'Email':'Teléfono'}: <b>${esc(u.email||u.phoneNumber||'')}</b></p><p class="mu">Registro: <b>${fd(p.createdAt?.toMillis?.()||+u.metadata.createdAt)}</b></p><p class="mu">Espacio usado: <b>${sz(used())} / ${sz(quota())}</b></p></div>${u.providerData.some(p=>p.providerId==='password')?`<div class="card"><h3>Seguridad</h3><label>Nueva contraseña</label><input id="np" type="password" placeholder="Mínimo 8 caracteres, letras y números" autocomplete="new-password"><button class="btn" data-a="savep">Cambiar contraseña</button><br><button class="btn ghost" data-a="rst">Enviarme correo de recuperación</button></div>`:''}<div class="card"><h3>Configuración</h3><label class="sw"><input type="checkbox" id="th" ${document.documentElement.dataset.theme==='dark'?'checked':''}> Tema oscuro</label><label class="sw"><input type="checkbox" id="nt" ${localStorage.getItem('mc-notif')!=='0'?'checked':''}> Notificaciones en pantalla</label><button class="btn er" data-a="out">Cerrar sesión</button></div></div>`}};
-function renderMain(){const m=$('#main');if(!m)return;m.innerHTML=V[S.view]();if(S.view==='files'||S.view==='dash')renderList();thumbs()}
-function items(){let a=S.files.filter(f=>!f.trashed&&live(f));if(S.view==='dash')a=a.filter(f=>!f.isFolder);a=S.q?a.filter(f=>f.name.toLowerCase().includes(S.q.toLowerCase())):S.view==='dash'?a:a.filter(f=>f.parent===S.parent);if(S.filter!=='all')a=a.filter(f=>!f.isFolder&&kind(f)===S.filter);
-const k={name:(x,y)=>x.name.localeCompare(y.name),date:(x,y)=>y.t-x.t,size:(x,y)=>(y.size||0)-(x.size||0),type:(x,y)=>ext(x.name).localeCompare(ext(y.name))}[S.sort];return a.sort((x,y)=>(y.isFolder-x.isFolder)||k(x,y))}
-function crumbs(){const c=[];let p=S.parent;while(p!=='root'){const f=byId(p);if(!f)break;c.unshift(f);p=f.parent}return['<a data-a="nav" data-id="root">Mis archivos</a>',...c.map(f=>`<a data-a="nav" data-id="${f.id}">${esc(f.name)}</a>`)].join(' › ')}
-function renderList(){const L=$('#list');if(!L)return;if($('#crumbs'))$('#crumbs').innerHTML=S.q?`Resultados para «${esc(S.q)}»`:crumbs();
-if($('#selbar'))$('#selbar').innerHTML=S.sel.size?`<div class="selbar"><b>${S.sel.size} seleccionado(s)</b><button class="btn er" data-a="trash">A la papelera</button><button class="btn ghost" data-a="unsel" aria-label="Cancelar selección">${ico('close',16)}</button></div>`:'';
-const a=items();L.className=S.grid?'grid':'list';L.innerHTML=!S.loaded?'<div class="sk"></div>'.repeat(8):a.length?a.map(card).join(''):(S.q||S.filter!=='all')?empty('Sin resultados','Prueba con otra búsqueda o filtro.',0):empty();thumbs();usageUpd()}
-function refresh(){if(!S.user||!$('#main'))return;usageUpd();(S.view==='files'||S.view==='dash')?renderList():renderMain()}
+shared(){return S.shares.length?`<div class="list shr">${S.shares.map(s=>`<div class="it"><div class="th">${icon({name:s.name})}</div><div class="in"><div class="nm">${esc(s.name)}</div><div class="mt">${s.active?'Activo':'Desactivado'} · ${s.downloads||0} descargas · ${sz(s.size)}</div></div><div class="ra"><button class="btn ghost" data-a="qr" data-id="${s.id}">${ico('qr',16)}<span>QR</span></button><button class="btn ghost" data-a="cp" data-id="${s.id}">Copiar enlace</button><button class="btn ghost" data-a="tog" data-id="${s.id}">${s.active?'Desactivar':'Activar'}</button></div></div>`).join('')}</div>`:empty('Aún no compartes nada')},
+trash(){const a=S.files.filter(f=>f.trashed&&live(f)).sort((x,y)=>y.t-x.t);return`<div class="tb">${a.length?'<button class="btn er" data-a="empty">Vaciar papelera</button>':''}</div>${!S.loaded?skel(4):a.length?`<div class="list shr">${a.map(f=>`<div class="it tr k-${kind(f)}"><div class="th">${icon(f)}</div><div class="in"><div class="nm">${esc(f.name)}</div><div class="mt">${sz(f.size)} · ${dleft(f)}</div></div><div class="ra"><button class="btn ghost" data-a="restore" data-id="${f.id}">${ico('restore',16)}<span>Restaurar</span></button><button class="btn er" data-a="purge1" data-id="${f.id}">${ico('trash',16)}<span>Eliminar</span></button></div></div>`).join('')}</div>`:empty('La papelera está vacía')}`},
+acct(){const p=S.profile||{},u=S.user;return`<div class="two"><div class="card"><h3>Perfil</h3><div class="hi"><span class="av big">${av()}</span><button class="btn ghost" data-a="photo">Cambiar foto</button></div><label>Nombre</label><input id="pn" value="${esc(p.name||u.displayName||'')}"><button class="btn" data-a="saven">Guardar nombre</button><p class="mu">${u.email?'Email':'Teléfono'}: <b>${esc(u.email||u.phoneNumber||'')}</b></p></div>${u.providerData.some(p=>p.providerId==='password')?`<div class="card"><h3>Seguridad</h3><label>Nueva contraseña</label><input id="np" type="password" placeholder="Mínimo 8 caracteres, letras y números" autocomplete="new-password"><button class="btn" data-a="savep">Cambiar contraseña</button><br><button class="btn ghost" data-a="rst">Enviarme correo de recuperación</button></div>`:''}<div class="card"><h3>Configuración</h3><label class="sw"><input type="checkbox" id="th" ${document.documentElement.dataset.theme==='dark'?'checked':''}> Tema oscuro</label><label class="sw"><input type="checkbox" id="nt" ${localStorage.getItem('mc-notif')!=='0'?'checked':''}> Notificaciones en pantalla</label><button class="btn er" data-a="out">Cerrar sesión</button></div></div>`}};
+function renderMain(){const m=$('#main');if(!m)return;m.innerHTML=V[S.view]();if(S.view==='dash')renderList();thumbs()}
+function items(){let a=S.files.filter(f=>!f.trashed&&live(f));a=a.filter(f=>!f.isFolder);if(S.q)a=a.filter(f=>f.name.toLowerCase().includes(S.q.toLowerCase()));
+const k={name:(x,y)=>x.name.localeCompare(y.name),date:(x,y)=>y.t-x.t,size:(x,y)=>(y.size||0)-(x.size||0),type:(x,y)=>ext(x.name).localeCompare(ext(y.name))}[S.sort];return a.sort(k)}
+function renderList(){const L=$('#list');if(!L)return;
+const a=items();L.className=S.grid?'grid':'list';L.innerHTML=!S.loaded?'<div class="sk"></div>'.repeat(8):a.length?a.map(card).join(''):S.q?empty('Sin resultados'):empty();thumbs();usageUpd()}
+function refresh(){if(!S.user||!$('#main'))return;usageUpd();S.view==='dash'?renderList():renderMain()}
 function thumbs(){$$('[data-th]').forEach(async el=>{try{el.innerHTML=`<img loading="lazy" alt="" src="${byId(el.dataset.th).url.replace('/upload/','/upload/c_fill,w_320,h_240,q_auto/')}">`}catch{}})}
 
-/* ---------- Subidas ---------- */
 function prog(name,size){const r=document.createElement('div');r.className='up';r.innerHTML=`<div><b></b><small>${sz(size)}</small></div><div class="bar"><i></i></div><small class="s"></small>`;r.querySelector('b').textContent=name;$('#ups').append(r);const i=r.querySelector('i'),s=r.querySelector('.s');s.textContent='Subiendo… 0%';
 return{set:p=>{i.style.width=p+'%';s.textContent=`Subiendo ${p}%`},ok:()=>{i.style.width='100%';s.textContent='Archivo subido correctamente';r.classList.add('ok');setTimeout(()=>r.remove(),4000)},err:m=>{s.textContent=m;r.classList.add('bad');setTimeout(()=>r.remove(),8000)}}}
 function cld(file,onp){return new Promise((ok,ko)=>{const x=new XMLHttpRequest(),b=new FormData();b.append('file',file);b.append('upload_preset',CLOUD_PRESET);x.open('POST',`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`);x.upload.onprogress=e=>e.lengthComputable&&onp&&onp(Math.round(e.loaded/e.total*100));x.onload=()=>{let j={};try{j=JSON.parse(x.responseText)}catch{}x.status===200&&j.secure_url?ok(j):ko(new Error(j.error?.message||'Cloudinary rechazó el archivo'))};x.onerror=()=>ko(new Error('Error de red al subir'));x.send(b)})}
@@ -430,7 +481,6 @@ function upload(list){const parent=S.parent,u=S.user.uid;let tot=used();[...list
 if(tot+f.size>quota()){toast('No tienes suficiente almacenamiento.',1);return}tot+=f.size;const p=prog(f.name,f.size);
 try{const j=await cld(f,p.set);await addDoc(collection(db,'files'),{ownerId:u,name:f.name,size:f.size,mime:f.type,url:j.secure_url,pid:j.public_id,rt:j.resource_type,parent,isFolder:false,trashed:false,createdAt:serverTimestamp()});p.ok()}catch(e){tot-=f.size;p.err(em(e))}})}
 
-/* ---------- Operaciones ---------- */
 const setT=ids=>t=>Promise.all(ids.map(async id=>{const f=byId(id);const d={trashed:t,trashedAt:t?Date.now():null};if(!t||f.parent==='root'||byId(f.parent))null;else d.parent='root';await updateDoc(doc(db,'files',id),d);if(t&&S.shares.some(s=>s.id===id&&s.active))await updateDoc(doc(db,'shares',id),{active:false})}));
 async function purge(ids){const all=new Set(),walk=i=>{all.add(i);S.files.filter(f=>f.parent===i).forEach(f=>walk(f.id))};ids.forEach(walk);
 await Promise.all([...all].map(async i=>{const f=byId(i);if(!f)return;if(S.shares.some(s=>s.id===i))await deleteDoc(doc(db,'shares',i));await deleteDoc(doc(db,'files',i))}))}
@@ -457,11 +507,9 @@ phback(){S.ph={step:1,iso:S.ph?.iso,raw:S.ph?.raw,nm:S.ph?.nm};phonePage()},
 phresend(){const s=S.ph;if(Date.now()-s.t<30000)return toast('Espera unos segundos para pedir otro código',1);S.ph={step:1,iso:s.iso,raw:s.raw,nm:s.nm};phonePage()},
 async vdone(){const u=auth.currentUser;await u.reload();if(u.emailVerified){await u.getIdToken(true);location.reload()}else $('#err').textContent='Todavía no está verificado. Revisa tu correo (y la carpeta de spam).'},
 async vresend(){await sendEmailVerification(auth.currentUser);toast('Correo reenviado')},
-view(v){S.view=v;S.q='';S.sel.clear();shell()},burger(){$('#side').classList.toggle('open');$('#ov').classList.toggle('on')},
-pick(){$('#fi').click()},grid(){S.grid=!S.grid;renderMain()},unsel(){S.sel.clear();renderList()},
-nav(id){S.parent=id;S.q='';S.sel.clear();if($('#q'))$('#q').value='';renderList()},
-sel(id,el){el.checked?S.sel.add(id):S.sel.delete(id);renderList()},
-open(id){const f=byId(id);if(!f)return;if(f.isFolder){if(S.view==='trash')return;S.q='';S.sel.clear();S.parent=id;if(S.view!=='files'){S.view='files';return shell()}return renderList()}return act.prev(id)},
+view(v){S.view=v;S.q='';shell()},burger(){$('#side').classList.toggle('open');$('#ov').classList.toggle('on')},
+pick(){$('#fi').click()},grid(){S.grid=!S.grid;renderMain()},
+open(id){return act.prev(id)},
 async prev(id){const f=byId(id),u=await url(id),k=kind(f),e=ext(f.name);
 const b=k==='image'?`<img src="${u}" alt="">`:k==='video'?`<video src="${u}" controls playsinline></video>`:k==='audio'?`<audio src="${u}" controls></audio>`:['pdf','txt','json'].includes(e)?`<iframe src="${u}"></iframe>`:`<div class="bigic">${icon(f)}</div><p class="mu">Sin vista previa para este tipo de archivo.</p>`;
 if(await modal(esc(f.name),`<div class="pv">${b}</div><p class="mu">${sz(f.size)} · ${fd(f.t)}</p>`,ico('download',16)+' Descargar'))dl(f.name,u)},
@@ -469,23 +517,14 @@ async dl(id){dl(byId(id).name,await url(id))},
 menu(id,el){const f=byId(id),r=el.getBoundingClientRect(),p=document.createElement('div');p.className='pop';p.style.top=Math.max(8,Math.min(r.bottom,innerHeight-290))+'px';p.style.left=Math.max(8,Math.min(r.right-170,innerWidth-186))+'px';
 const L=S.view==='trash'?[['restore',ico('restore',16)+'Restaurar'],['purge1',ico('trash',16)+'Eliminar para siempre']]:[['open',ico(f.isFolder?'folder':'eye',16)+(f.isFolder?'Abrir':'Ver')],...(f.isFolder?[]:[['dl',ico('download',16)+'Descargar'],['share',ico('link',16)+'Compartir y QR']]),['rename',ico('edit',16)+'Renombrar'],['trash',ico('trash',16)+'A la papelera']];
 p.innerHTML=L.map(([a,l])=>`<button data-a="${a}" data-id="${id}">${l}</button>`).join('');document.body.append(p)},
-async newf(){const m=await modal('Nueva carpeta','<input id="mi" placeholder="Nombre de la carpeta" maxlength="100">','Crear');const n=m?.querySelector('#mi').value.trim();if(!n)return;await addDoc(collection(db,'files'),{ownerId:S.user.uid,name:n,isFolder:true,parent:S.parent,trashed:false,size:0,createdAt:serverTimestamp()});toast('Carpeta creada')},
 async rename(id){const f=byId(id),m=await modal('Renombrar',`<input id="mi" value="${esc(f.name)}" maxlength="150">`,'Guardar'),n=m?.querySelector('#mi').value.trim();if(!n||n===f.name)return;await updateDoc(doc(db,'files',id),{name:n});if(S.shares.some(s=>s.id===id))await updateDoc(doc(db,'shares',id),{name:n});toast('Renombrado')},
-async move(id){const ids=id?[id]:[...S.sel],ex=new Set(),walk=i=>{ex.add(i);S.files.filter(f=>f.parent===i&&f.isFolder).forEach(f=>walk(f.id))};ids.forEach(i=>byId(i)?.isFolder&&walk(i));
-const path=f=>{let s=f.name,p=f.parent;while(p!=='root'&&byId(p)){s=byId(p).name+' / '+s;p=byId(p).parent}return s};
-const o=S.files.filter(f=>f.isFolder&&!f.trashed&&live(f)&&!ex.has(f.id));
-const m=await modal('Mover a',`<select id="mi"><option value="root">Mis archivos</option>${o.map(f=>`<option value="${f.id}">${esc(path(f))}</option>`).join('')}</select>`,'Mover');if(!m)return;
-const t=m.querySelector('#mi').value;await Promise.all(ids.map(i=>updateDoc(doc(db,'files',i),{parent:t})));S.sel.clear();toast('Movido')},
-async trash(id){const ids=id?[id]:[...S.sel];if(!ids.length)return;await setT(ids)(true);S.sel.clear();toast('Enviado a la papelera')},
+async trash(id){await setT([id])(true);toast('Enviado a la papelera')},
 async restore(id){await setT([id])(false);toast('Restaurado')},
 async purge1(id){if(await modal('Eliminar para siempre',`<p>«${esc(byId(id).name)}» se borrará definitivamente.</p>`,'Eliminar')){await purge([id]);toast('Eliminado definitivamente')}},
 async empty(){const ids=S.files.filter(f=>f.trashed&&live(f)).map(f=>f.id);if(ids.length&&await modal('Vaciar papelera',`<p>Se borrarán ${ids.length} elemento(s) para siempre.</p>`,'Vaciar')){await purge(ids);toast('Papelera vaciada')}},
 async share(id){const f=byId(id),s=S.shares.find(x=>x.id===id);if(!s)await setDoc(doc(db,'shares',id),{ownerId:S.user.uid,name:f.name,size:f.size,mime:f.mime||'',url:f.url,createdAt:serverTimestamp(),active:true,downloads:0});else if(!s.active)await updateDoc(doc(db,'shares',id),{active:true});return act.qr(id)},
 async qr(id){const L=link(id),nm=(byId(id)||S.shares.find(x=>x.id===id)||{}).name||'archivo',{default:Q}=await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm'),img=await Q.toDataURL(L,{width:360,margin:2,color:{dark:'#0a0f1f',light:'#ffffff'}});
-if(await modal('Compartir archivo',`<p class="mu">Escanea el código con la cámara para abrir la página de descarga de «${esc(nm)}», o copia el enlace.</p><div class="qr"><img src="${img}" alt="Código QR"></div><input readonly value="${L}" onfocus="this.select()"><a class="btn ghost" href="${img}" download="QR-${esc(nm)}.png">${ico('download',16)} Guardar imagen del QR</a>`,'Copiar enlace'))copy(L)},
-theme(id,el){const d=document.documentElement.dataset.theme!=='dark';setTheme(d);el.innerHTML=`<span>${ico(d?'sun':'moon',19)}</span><i>${d?'Tema claro':'Tema oscuro'}</i>`},
-burger2(){$('#side').classList.remove('open');$('#ov').classList.remove('on')},dpick(){act.burger2();$('#fi').click()},dnewf(){act.burger2();return act.newf()},
-async newfd(){S.parent='root';return act.newf()},flt(id){S.filter=id;renderMain()},
+if(await modal('Compartir archivo',`<p class="mu">${esc(nm)}</p><div class="qr"><img src="${img}" alt="Código QR"></div><input readonly value="${L}" onfocus="this.select()"><a class="btn ghost" href="${img}" download="QR-${esc(nm)}.png">${ico('download',16)} Guardar imagen del QR</a>`,'Copiar enlace'))copy(L)},
 cp(id){copy(link(id))},async tog(id){const s=S.shares.find(x=>x.id===id);await updateDoc(doc(db,'shares',id),{active:!s.active});toast(s.active?'Enlace desactivado':'Enlace activado')},
 async saven(){const n=$('#pn').value.trim();if(!n)return toast('El nombre es obligatorio',1);await updateProfile(auth.currentUser,{displayName:n});await updateDoc(doc(db,'users',S.user.uid),{name:n});toast('Nombre actualizado')},
 async savep(){const p=$('#np').value;if(p.length<8||!/[A-Za-z]/.test(p)||!/\d/.test(p))return toast('Mínimo 8 caracteres, con letras y números',1);await updatePassword(auth.currentUser,p);$('#np').value='';toast('Contraseña cambiada')},
@@ -493,26 +532,24 @@ rst(){return sendPasswordResetEmail(auth,S.user.email).then(()=>toast('Correo en
 out(){return signOut(auth)},
 photo(){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=async()=>{const f=i.files[0];if(!f)return;if(f.size>5e6)return toast('La foto debe pesar menos de 5 MB',1);try{const j=await cld(f);await updateDoc(doc(db,'users',S.user.uid),{photo:j.secure_url});toast('Foto actualizada')}catch(e){toast(em(e),1)}};i.click()}};
 
-/* ---------- Página pública ---------- */
 async function pub(id){$('#app').innerHTML=`<div class="authw"><div class="authb" id="pb" style="text-align:center"><div class="logo">${brand()}</div><p class="mu">Cargando…</p></div></div>`;
 try{const d=await getDoc(doc(db,'shares',id));if(!d.exists()||!d.data().active)throw 0;const s=d.data(),f={name:s.name};document.title=s.name+' · Storcloud';const k=kind(f),e=ext(s.name),u=s.url;
 const pv=k==='image'?`<img src="${u}" alt="">`:k==='video'?`<video src="${u}" controls playsinline></video>`:k==='audio'?`<audio src="${u}" controls></audio>`:e==='pdf'?`<iframe src="${u}"></iframe>`:`<div class="bigic">${icon(f)}</div>`;
 $('#pb').innerHTML=`<div class="logo">${brand()}</div><div class="pv">${pv}</div><h2 style="word-break:break-all">${esc(s.name)}</h2><p class="mu">Tipo: ${(e||'archivo').toUpperCase()} · ${sz(s.size)} · ${fd(s.createdAt.toMillis())}</p><br><button class="btn big" id="pd">${ico('download',17)}<span>Descargar</span></button><div class="lk"><a id="hm">Ir a Storcloud</a></div>`;
 $('#pd').onclick=async()=>{try{await updateDoc(doc(db,'shares',id),{downloads:increment(1)})}catch{}dl(s.name,u)};$('#hm').onclick=()=>{location.hash=''}}
-catch{$('#pb').innerHTML=`<div class="logo">${brand()}</div><div class="empty"><div>${ico('ban',54)}</div><h3>Enlace no disponible</h3><p>Fue desactivado o ya no existe.</p></div><a id="hm">Ir a Storcloud</a>`;$('#hm').onclick=()=>{location.hash=''}}}
+catch{$('#pb').innerHTML=`<div class="logo">${brand()}</div><div class="empty"><div>${ico('ban',54)}</div><h3>Enlace no disponible</h3></div><a id="hm">Ir a Storcloud</a>`;$('#hm').onclick=()=>{location.hash=''}}}
 
-/* ---------- Eventos globales ---------- */
 document.addEventListener('click',e=>{$('.pop')?.remove();const a=e.target.closest('[data-a]');if(a&&act[a.dataset.a])Promise.resolve(act[a.dataset.a](a.dataset.id,a,e)).catch(x=>toast(em(x),1))});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.closest('.authb')&&$('#sub'))$('#sub').click()});
 document.addEventListener('input',e=>{if(e.target.id==='q'){S.q=e.target.value;renderList()}});
-document.addEventListener('change',e=>{const i=e.target.id;if(i==='flt'){S.filter=e.target.value;renderList()}else if(i==='srt'){S.sort=e.target.value;renderList()}else if(i==='th')setTheme(e.target.checked);else if(i==='nt')localStorage.setItem('mc-notif',e.target.checked?'1':'0')});
+document.addEventListener('change',e=>{const i=e.target.id;if(i==='srt'){S.sort=e.target.value;renderList()}else if(i==='th')setTheme(e.target.checked);else if(i==='nt')localStorage.setItem('mc-notif',e.target.checked?'1':'0')});
 $('#fi').addEventListener('change',e=>{if(S.user)upload(e.target.files);e.target.value=''});
 ['dragover','dragleave','drop'].forEach(t=>addEventListener(t,e=>{if(!S.user||(S.view!=='files'&&S.view!=='dash'))return;e.preventDefault();document.body.classList.toggle('drag',t==='dragover');if(t==='drop'&&e.dataTransfer.files.length)upload(e.dataTransfer.files)}));
 function route(){const h=location.hash;if(h.startsWith('#/s/'))return pub(h.slice(4).split('/')[0]);if(S.user===undefined)return;if(S.user&&S.gate)return verifyPage();S.user?shell():authPages()}
 addEventListener('hashchange',route);
 async function ensureProfile(u){try{const r=doc(db,'users',u.uid);if(!(await getDoc(r)).exists())await setDoc(r,{name:S.pendingName||u.displayName||(u.email?u.email.split('@')[0]:u.phoneNumber)||'Usuario',email:u.email||'',quota:QUOTA,photo:u.photoURL||'',createdAt:serverTimestamp()})}catch(e){toast(em(e),1)}}
 let unsub=[];
-onAuthStateChanged(auth,u=>{unsub.forEach(f=>f());unsub=[];Object.assign(S,{user:u,files:[],shares:[],profile:null,loaded:false,parent:'root',q:'',sel:new Set(),urls:{},page:'landing',gate:!!(u&&u.providerData.some(p=>p.providerId==='password')&&!u.emailVerified),swept:false});
+onAuthStateChanged(auth,u=>{unsub.forEach(f=>f());unsub=[];Object.assign(S,{user:u,files:[],shares:[],profile:null,loaded:false,parent:'root',q:'',urls:{},page:'landing',gate:!!(u&&u.providerData.some(p=>p.providerId==='password')&&!u.emailVerified),swept:false});
 if(u&&!S.gate){ensureProfile(u);S.view='dash';unsub=[onSnapshot(doc(db,'users',u.uid),d=>{S.profile=d.data()||null;refresh()},e=>toast(em(e),1)),
 onSnapshot(query(collection(db,'files'),where('ownerId','==',u.uid)),s=>{S.files=s.docs.map(mp);S.loaded=true;refresh();sweep()},e=>toast(em(e),1)),
 onSnapshot(query(collection(db,'shares'),where('ownerId','==',u.uid)),s=>{S.shares=s.docs.map(mp);refresh()},e=>toast(em(e),1))]}
