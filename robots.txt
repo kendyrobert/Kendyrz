@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://kendygta-git-main-kendy7.vercel.app/sitemap.xml
