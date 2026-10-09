@@ -1,158 +1,118 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Acortador de enlaces</title>
-<!-- ============ 1. ESTILOS ============ -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Fire Profile Analyzer – Analiza perfiles por UID</title>
+<meta name="description" content="Consulta estadísticas de jugadores de Free Fire por UID y región. Guarda favoritos, revisa tu historial y compara perfiles.">
+<link rel="canonical" href="https://kendygta.vercel.app">
+<meta property="og:title" content="Free Fire Profile Analyzer">
+<meta property="og:description" content="Analiza perfiles de Free Fire por UID y región.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0d0a0a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#17191C;--card:#202328;--card2:#2B2F35;--line:#363B42;--tx:#E4E6EA;--mut:#98A0AA;--ac:#8FA3B8;--ok:#6FAF8E;--er:#C87474;--wa:#C9A86A;color-scheme:dark}
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--tx);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-a{color:var(--ac)}
-.layout{display:flex;min-height:100vh}
-aside{width:230px;background:var(--card);border-right:1px solid var(--line);padding:20px 14px;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;gap:6px;z-index:20;transition:transform .25s}
-.brand{font-weight:700;font-size:18px;padding:4px 10px 16px}
-.nav{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;color:var(--mut);background:none;border:0;font:inherit;cursor:pointer;text-align:left;width:100%;transition:.15s}
-.nav:hover,.nav.on{background:var(--card2);color:var(--tx)}
-main{margin-left:230px;flex:1;padding:28px;max-width:1000px;width:100%}
-.top{display:none;position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;align-items:center;gap:12px;z-index:10}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 6px 20px rgba(0,0,0,.25);margin-bottom:18px}
-h1{font-size:28px;margin-bottom:6px}h2{font-size:19px;margin-bottom:12px}.mut{color:var(--mut)}
-input,select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;outline:0;transition:.15s}
-input:focus,select:focus{border-color:var(--ac)}
-label{display:block;font-size:13px;color:var(--mut);margin:12px 0 6px}
-.btn{background:var(--ac);color:#14171A;border:0;border-radius:10px;padding:11px 18px;font:600 14px inherit;cursor:pointer;transition:transform .12s,filter .15s}
-.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}.btn:active{transform:scale(.96)}
-.btn.sec{background:var(--card2);color:var(--tx);border:1px solid var(--line)}
-.btn.dan{background:#6B3A3A;color:#fff}.btn:disabled{opacity:.5;cursor:wait}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.row>.btn{flex:none}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:18px}
-.stat b{display:block;font-size:30px}
-.item{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px;background:var(--bg)}
-.item .u{word-break:break-all;font-size:13px;color:var(--mut)}
-.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--card2)}
-.hide{display:none!important}
-.result{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:16px}
-.short{font-size:18px;font-weight:600;word-break:break-all}
-#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50}
-.toast{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--ac);padding:12px 16px;border-radius:10px;max-width:320px;animation:in .25s}
-.toast.ok{border-left-color:var(--ok)}.toast.er{border-left-color:var(--er)}
-@keyframes in{from{opacity:0;transform:translateY(8px)}}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid #0004;border-top-color:#14171A;border-radius:50%;animation:r .7s linear infinite;vertical-align:-2px;margin-right:6px}
-@keyframes r{to{transform:rotate(360deg)}}
-.full{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}
-.ad{border:1px dashed var(--line);border-radius:12px;min-height:120px;display:flex;align-items:center;justify-content:center;color:var(--mut);margin:16px 0}
-dialog{background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
+:root{--bg:#0d0a0a;--card:#171212;--card2:#1f1717;--line:#33261f;--txt:#f3ece6;--mut:#a89a90;--red:#ff3d2e;--ora:#ff8a1f;--gold:#ffc83d}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1000px 420px at 50% -8%,#3a130d,transparent 70%),var(--bg);color:var(--txt);font:16px/1.55 Inter,system-ui,sans-serif}
+h1,h2,h3,.logo{font-family:"Chakra Petch",Inter,sans-serif}
+a{color:var(--ora)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#0d0a0aee;backdrop-filter:blur(8px);z-index:10}
+.logo{font-weight:700;font-size:19px;color:var(--gold);text-decoration:none;white-space:nowrap}
+.logo span{color:var(--red)}
+nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+nav a.nl{color:var(--txt);text-decoration:none;padding:6px 8px;border-radius:8px;font-size:14px}
+nav a.nl:hover{background:var(--card2)}
+button,.btn{background:linear-gradient(90deg,var(--red),var(--ora));color:#fff;border:0;border-radius:10px;padding:10px 16px;font:600 15px Inter,sans-serif;cursor:pointer}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+button.sm{padding:6px 10px;font-size:13px}
+button:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:920px;margin:0 auto;padding:16px}
+.hero{padding:40px 0 18px;text-align:center}
+.hero h1{font-size:clamp(30px,8vw,54px);line-height:1.05;margin:0 0 12px}
+.hero h1 b{background:linear-gradient(90deg,var(--red),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);margin:0 auto 22px;max-width:540px}
+form.search{display:grid;gap:10px;grid-template-columns:1fr;max-width:600px;margin:auto}
+@media(min-width:640px){form.search{grid-template-columns:1fr 130px auto}}
+input,select{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:12px;font-size:16px;width:100%;font-family:inherit}
+label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+.card h2,.card h3{margin:0 0 10px;color:var(--gold)}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat small{color:var(--mut);display:block;font-size:13px}
+.stat b{font-size:21px;font-family:"Chakra Petch",sans-serif}
+.na{color:var(--mut);font-size:14px;font-weight:400;font-family:Inter,sans-serif}
+.bar{height:8px;background:#0d0a0a;border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--gold))}
+.msg{border-left:4px solid var(--ora);background:var(--card2);padding:12px 14px;border-radius:8px;margin:14px 0}
+.msg.err{border-color:var(--red)}
+.sk{height:74px;border-radius:10px;background:linear-gradient(90deg,#171212,#271c1a,#171212);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.who{display:flex;gap:14px;align-items:center}
+.ava{width:68px;height:68px;border-radius:14px;background:var(--card2);border:1px solid var(--line);object-fit:cover;display:grid;place-items:center;color:var(--mut);font-size:12px}
+.lvl{display:inline-block;background:linear-gradient(90deg,var(--ora),var(--gold));color:#1a0d00;font-weight:700;border-radius:8px;padding:2px 10px;font-family:"Chakra Petch",sans-serif}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--gold);font-family:"Chakra Petch",sans-serif}
+details{border-bottom:1px solid var(--line);padding:10px 0}
+summary{cursor:pointer;font-weight:600}
+details p{color:var(--mut);margin:8px 0 0}
+dialog{background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:14px;max-width:380px;width:92%}
 dialog::backdrop{background:#000a}
-@media(max-width:800px){aside{transform:translateX(-100%)}aside.open{transform:none}main{margin-left:0;padding:16px}.top{display:flex}}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:22px 16px;color:var(--mut);font-size:14px;text-align:center}
+.list-item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.hide{display:none!important}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
 
-<div id="toasts"></div>
+<header>
+  <a class="logo" href="#/">FF <span>Profile</span> Analyzer</a>
+  <nav aria-label="Principal">
+    <a class="nl" href="#/comparar">Comparar</a>
+    <a class="nl hide" id="nav-fav" href="#/favoritos">Favoritos</a>
+    <a class="nl hide" id="nav-his" href="#/historial">Historial</a>
+    <button class="ghost sm" id="btn-login">Iniciar sesión</button>
+    <button class="ghost sm hide" id="btn-logout">Cerrar sesión</button>
+  </nav>
+</header>
 
-<!-- Pantalla de redirección / enlace no encontrado / anuncio -->
-<div id="gate" class="full hide"><div class="card" style="max-width:480px;width:100%" id="gateBox"></div></div>
+<main id="app"></main>
 
-<div class="layout" id="app">
-  <aside id="side">
-    <div class="brand">🔗 Acortador</div>
-    <button class="nav on" data-v="home">Inicio</button>
-    <button class="nav" data-v="dash">Mi panel</button>
-    <button class="nav" data-v="help">Ayuda</button>
-    <div style="flex:1"></div>
-    <div class="mut" id="who" style="font-size:12px;padding:6px 10px"></div>
-    <button class="nav" id="authBtn" data-v="auth">Entrar</button>
-  </aside>
-  <div style="flex:1;min-width:0">
-    <div class="top"><button class="btn sec" id="burger" aria-label="Menú">☰</button><b>Acortador</b></div>
-    <main>
+<footer>
+  <p>Free Fire Profile Analyzer es una herramienta independiente. No está afiliada a Garena ni a Free Fire. Free Fire es marca de sus propietarios.</p>
+  <p><a href="#/privacidad">Privacidad</a> · <a href="mailto: robertcreativo23@gmail.com">Contacto</a></p>
+</footer>
 
-      <!-- INICIO -->
-      <section id="v-home">
-        <h1>Acorta, comparte y mide tus enlaces</h1>
-        <p class="mut">Pega una URL larga y obtén un enlace corto con QR y estadísticas.</p>
-        <div class="card" style="margin-top:20px">
-          <label for="url">URL larga</label>
-          <input id="url" type="url" placeholder="https://ejemplo.com/pagina-muy-larga" autocomplete="off">
-          <label for="alias">Alias personalizado (opcional)</label>
-          <input id="alias" placeholder="mi-enlace" maxlength="30" autocomplete="off">
-          <div style="margin-top:16px"><button class="btn" id="mk">Crear enlace corto</button></div>
-          <div class="result hide" id="res">
-            <div class="short" id="shortTxt"></div>
-            <div class="row" style="margin-top:12px">
-              <button class="btn sec" id="rCopy">Copiar</button>
-              <button class="btn sec" id="rOpen">Abrir original</button>
-              <button class="btn sec" id="rShare">Compartir</button>
-              <button class="btn sec" id="rQr">Código QR</button>
-            </div>
-          </div>
-        </div>
-      </section>
+<dialog id="dlg-auth">
+  <form method="dialog" id="auth-form">
+    <h2 id="auth-title" style="margin-top:0;color:var(--gold)">Iniciar sesión</h2>
+    <label for="a-mail">Correo electrónico</label>
+    <input id="a-mail" type="email" autocomplete="email" required>
+    <label for="a-pass">Contraseña</label>
+    <input id="a-pass" type="password" autocomplete="current-password" minlength="6">
+    <p id="a-err" class="msg err hide" role="alert"></p>
+    <div style="display:grid;gap:8px;margin-top:14px">
+      <button type="button" id="a-submit">Entrar</button>
+      <button type="button" class="ghost" id="a-google">Continuar con Google</button>
+      <button type="button" class="ghost" id="a-toggle">Crear una cuenta</button>
+      <button type="button" class="ghost" id="a-reset">Olvidé mi contraseña</button>
+      <button type="button" class="ghost" id="a-close">Cerrar</button>
+    </div>
+  </form>
+</dialog>
 
-      <!-- PANEL -->
-      <section id="v-dash" class="hide">
-        <h1>Mi panel</h1>
-        <div class="stats">
-          <div class="card stat"><span class="mut">Enlaces</span><b id="sT">0</b></div>
-          <div class="card stat"><span class="mut">Clics</span><b id="sC">0</b></div>
-          <div class="card stat"><span class="mut">Activos</span><b id="sA">0</b></div>
-        </div>
-        <div class="card">
-          <div class="row">
-            <input id="q" placeholder="Buscar por código o URL">
-            <select id="fs"><option value="all">Todos</option><option value="on">Activos</option><option value="off">Desactivados</option></select>
-            <select id="fd"><option value="all">Cualquier fecha</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option></select>
-          </div>
-          <div id="list"></div>
-        </div>
-      </section>
-
-      <!-- AUTENTICACIÓN -->
-      <section id="v-auth" class="hide">
-        <div class="card" style="max-width:420px">
-          <h2 id="aTitle">Iniciar sesión</h2>
-          <label for="em">Correo electrónico</label><input id="em" type="email" autocomplete="email">
-          <label for="pw">Contraseña</label><input id="pw" type="password" autocomplete="current-password">
-          <div class="row" style="margin-top:16px"><button class="btn" id="aGo">Entrar</button><button class="btn sec" id="aSwap">Crear cuenta</button></div>
-          <p style="margin-top:14px"><a href="#" id="aReset">¿Olvidaste tu contraseña?</a></p>
-          <button class="btn sec hide" id="aOut" style="margin-top:10px">Cerrar sesión</button>
-        </div>
-      </section>
-
-      <!-- AYUDA -->
-      <section id="v-help" class="hide">
-        <h1>Ayuda</h1>
-        <div class="card">
-          <h2>Cómo usarlo</h2>
-          <ol style="padding-left:20px">
-            <li>Pega una URL que empiece por http:// o https://.</li>
-            <li>Opcional: elige un alias (3–30 letras, números, - o _).</li>
-            <li>Pulsa «Crear enlace corto» y copia, comparte o descarga el QR.</li>
-            <li>Inicia sesión para guardar tus enlaces y ver clics en «Mi panel».</li>
-          </ol>
-          <h2 style="margin-top:18px">Formato del enlace</h2>
-          <p class="mut">Los enlaces tienen la forma <code>https://tudominio.com/?r=codigo</code>. Las rutas limpias (<code>/codigo</code>) requieren una regla de reescritura en el hosting (ver guía de configuración).</p>
-        </div>
-      </section>
-    </main>
-  </div>
-</div>
-
-<dialog id="qrDlg"><canvas id="qrCv"></canvas><p class="mut" id="qrTxt" style="word-break:break-all;max-width:280px;margin:10px auto"></p>
-  <div class="row" style="justify-content:center"><button class="btn" id="qrDl">Descargar PNG</button><button class="btn sec" id="qrX">Cerrar</button></div></dialog>
-
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script type="module">
-/* ============ 2. CONFIGURACIÓN ============ */
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,query,where,getDocs,serverTimestamp,writeBatch} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-
-// ▼▼▼ CONFIGURACIÓN DE FIREBASE (la apiKey web es pública por diseño; la seguridad la dan las reglas) ▼▼▼
-const firebaseConfig = {
+/* ========= CONFIGURACIÓN (rellena estos valores) ========= */
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAWr9YM0YAG0mx0SEk3qNEhjeS1MOu_2lg",
   authDomain: "kendy-57bcd.firebaseapp.com",
   projectId: "kendy-57bcd",
@@ -161,249 +121,333 @@ const firebaseConfig = {
   appId: "1:678778497788:web:1e26e4c5be5c60f2f98579",
   measurementId: "G-KKW9TV2H8J"
 };
-// ▲▲▲ FIN DE LA CONFIGURACIÓN ▲▲▲
+// URL base de TU backend (por ejemplo "https://api.tudominio.com"). Vacío = backend no configurado.
+const API_BASE = "";
+/* ========================================================= */
 
-const OPTIONS = {
-  GUEST_MODE: true,        // permite crear enlaces sin cuenta (ownerUid = null)
-  USE_FUNCTIONS: false,    // true tras desplegar la Cloud Function "resolveLink" (plan Blaze). Sin ella NO se cuentan clics de forma fiable.
-  FUNCTIONS_REGION: "us-central1",
-  ADS_ENABLED: false,      // déjalo en false hasta tener una plataforma publicitaria autorizada
-  ADS_WAIT_SECONDS: 8,
-  AD_SNIPPET_HTML: ""      // aquí pegarías el código oficial de tu proveedor de anuncios (vacío = no hay anuncio)
-};
+const $ = (s, r = document) => r.querySelector(s);
+const app = $("#app");
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const NA = '<span class="na">No disponible</span>';
+const num = v => (typeof v === "number" && isFinite(v)) ? v.toLocaleString("es") : NA;
+const fbOK = !FIREBASE_CONFIG.apiKey.startsWith("TU_");
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app), db = getFirestore(app);
-const resolveFn = OPTIONS.USE_FUNCTIONS ? httpsCallable(getFunctions(app, OPTIONS.FUNCTIONS_REGION), "resolveLink") : null;
-
-/* ============ 3. UTILIDADES ============ */
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const RESERVED = ["admin","api","login","help","dashboard","null"];
-const base = () => location.origin + location.pathname;
-const shortUrl = c => base() + "?r=" + encodeURIComponent(c);
-
-function toast(msg, type = "") {
-  const t = document.createElement("div"); t.className = "toast " + type; t.textContent = msg;
-  $("toasts").append(t); setTimeout(() => t.remove(), 4500);
-}
-function validUrl(s) {
-  try { const u = new URL(s.trim()); return (u.protocol === "http:" || u.protocol === "https:") ? u.href : null; }
-  catch { return null; }
-}
-function fbError(e) {
-  const c = e && e.code || "";
-  if (c.includes("permission-denied")) return "Permisos insuficientes (o el alias ya está en uso).";
-  if (c.includes("unavailable") || c.includes("network")) return "Problema de conexión. Revisa tu internet.";
-  if (c === "auth/invalid-credential" || c === "auth/wrong-password" || c === "auth/user-not-found") return "Correo o contraseña incorrectos.";
-  if (c === "auth/email-already-in-use") return "Ese correo ya está registrado.";
-  if (c === "auth/weak-password") return "La contraseña debe tener al menos 6 caracteres.";
-  if (c === "auth/invalid-email") return "Correo no válido.";
-  if (c === "auth/too-many-requests") return "Demasiados intentos. Espera un momento.";
-  if (c === "failed-precondition" || c === "unauthenticated") return "Operación no disponible: " + (e.message || c);
-  return "Error: " + (e && e.message || "desconocido");
-}
-async function copy(text) {
-  try { await navigator.clipboard.writeText(text); toast("Copiado al portapapeles", "ok"); }
-  catch { toast("No se pudo copiar", "er"); }
-}
-function busy(btn, on, label) { btn.disabled = on; btn.innerHTML = on ? '<span class="spin"></span>' + label : label; }
-const randCode = (n = 6) => { const a = "abcdefghijkmnpqrstuvwxyz23456789", r = crypto.getRandomValues(new Uint8Array(n)); return [...r].map(x => a[x % a.length]).join(""); };
-
-/* ============ 4. NAVEGACIÓN ============ */
-function show(v) {
-  if (v === "dash" && !auth.currentUser) { toast("Inicia sesión para ver tu panel"); v = "auth"; }
-  ["home","dash","auth","help"].forEach(x => $("v-" + x).classList.toggle("hide", x !== v));
-  document.querySelectorAll(".nav").forEach(b => b.classList.toggle("on", b.dataset.v === v));
-  $("side").classList.remove("open");
-  if (v === "dash") loadDash();
-}
-document.querySelectorAll(".nav").forEach(b => b.onclick = () => show(b.dataset.v));
-$("burger").onclick = () => $("side").classList.toggle("open");
-
-/* ============ 5. REDIRECCIÓN (?r=codigo) ============ */
-async function handleRedirect(code) {
-  $("app").classList.add("hide"); $("gate").classList.remove("hide");
-  const box = $("gateBox");
-  box.innerHTML = '<p><span class="spin" style="border-color:#fff4;border-top-color:#fff"></span>Redirigiendo…</p>';
-  let url = null;
+/* ---------- Firebase (carga dinámica) ---------- */
+let A = null, D = null, auth = null, db = null, user = null;
+async function initFirebase() {
+  if (!fbOK) return;
   try {
-    if (resolveFn) { url = (await resolveFn({code})).data.url; }   // la función suma el clic en el servidor
-    else {
-      const s = await getDoc(doc(db, "links", code));
-      if (s.exists() && s.data().active) url = s.data().originalUrl;
-    }
-  } catch (e) {
-    if (e.code !== "functions/not-found") { box.innerHTML = "<h2>Error</h2><p class='mut'>" + esc(fbError(e)) + "</p>"; return; }
-  }
-  url = url && validUrl(url);
-  if (!url) { box.innerHTML = "<h2>Enlace no encontrado</h2><p class='mut'>El código «" + esc(code) + "» no existe o está desactivado.</p><p style='margin-top:14px'><a href='" + esc(base()) + "'>Ir al inicio</a></p>"; return; }
-  if (!OPTIONS.ADS_ENABLED) { location.replace(url); return; }
-  // Página intermedia opcional (solo si ADS_ENABLED = true)
-  let n = OPTIONS.ADS_WAIT_SECONDS;
-  box.innerHTML = '<h2>Tu enlace estará listo en <span id="cd">' + n + '</span> s</h2><div class="ad" id="adSlot">' + (OPTIONS.AD_SNIPPET_HTML || "Espacio publicitario") + '</div><button class="btn" id="go" disabled>Continuar</button>';
-  const iv = setInterval(() => {
-    n--; $("cd").textContent = n;
-    if (n <= 0) { clearInterval(iv); $("go").disabled = false; }
-  }, 1000);
-  $("go").onclick = () => location.replace(url);
+    const V = "10.12.2", base = `https://www.gstatic.com/firebasejs/${V}/`;
+    const appM = await import(base + "firebase-app.js");
+    A = await import(base + "firebase-auth.js");
+    D = await import(base + "firebase-firestore.js");
+    const fa = appM.initializeApp(FIREBASE_CONFIG);
+    auth = A.getAuth(fa);
+    db = D.getFirestore(fa);
+    await A.setPersistence(auth, A.browserLocalPersistence);
+    A.onAuthStateChanged(auth, u => { user = u; paintNav(); route(); });
+  } catch (e) { console.error(e); }
+}
+function paintNav() {
+  $("#btn-login").classList.toggle("hide", !!user);
+  $("#btn-logout").classList.toggle("hide", !user);
+  $("#nav-fav").classList.toggle("hide", !user);
+  $("#nav-his").classList.toggle("hide", !user);
 }
 
-/* ============ 6. CREAR ENLACES ============ */
-let lastLink = null;
-const guestMap = () => { try { return JSON.parse(localStorage.getItem("guestLinks") || "{}"); } catch { return {}; } };
-
-$("mk").onclick = async () => {
-  const btn = $("mk"), url = validUrl($("url").value), alias = $("alias").value.trim();
-  if (!url) return toast("URL no válida: usa http:// o https://", "er");
-  if (alias && (!/^[a-zA-Z0-9_-]{3,30}$/.test(alias) || RESERVED.includes(alias.toLowerCase()))) return toast("Alias no válido (3–30 caracteres: letras, números, - _)", "er");
-  const user = auth.currentUser;
-  if (!user && !OPTIONS.GUEST_MODE) { toast("Inicia sesión para crear enlaces"); return show("auth"); }
-  busy(btn, true, "Creando…");
+/* ---------- API del backend ---------- */
+async function api(path) {
+  if (!API_BASE) throw new Error("NO_BACKEND");
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 20000);
   try {
-    // Evitar duplicados innecesarios (solo si no se pidió alias)
-    let existing = null;
-    if (!alias) {
-      if (user) {
-        const q = await getDocs(query(collection(db, "links"), where("ownerUid", "==", user.uid), where("originalUrl", "==", url)));
-        if (!q.empty) existing = q.docs[0].data();
-      } else if (guestMap()[url]) existing = {code: guestMap()[url], originalUrl: url};
-    }
-    if (existing) { lastLink = existing; toast("Ya existía un enlace para esa URL", "ok"); }
-    else {
-      let code = alias || randCode(), tries = alias ? 1 : 4;
-      for (; tries > 0; tries--) {
-        const ref = doc(db, "links", code);
-        if (!(await getDoc(ref)).exists()) {
-          await setDoc(ref, {code, originalUrl: url, createdAt: serverTimestamp(), clicks: 0, ownerUid: user ? user.uid : null, active: true});
-          lastLink = {code, originalUrl: url};
-          if (!user) { const g = guestMap(); g[url] = code; localStorage.setItem("guestLinks", JSON.stringify(g)); }
-          break;
-        }
-        if (alias) throw {code: "alias-taken"};
-        code = randCode();
-      }
-      if (tries === 0 && !lastLink) throw new Error("No se pudo generar un código libre");
-      toast("Enlace creado", "ok");
-    }
-    $("shortTxt").textContent = shortUrl(lastLink.code); $("res").classList.remove("hide");
+    const r = await fetch(API_BASE + path, { signal: ctl.signal });
+    if (r.status === 429) throw new Error("RATE");
+    if (r.status === 404) throw new Error("NOT_FOUND");
+    if (r.status === 501 || r.status === 503) throw new Error("PROVIDER");
+    if (!r.ok) throw new Error("HTTP_" + r.status);
+    return await r.json();
   } catch (e) {
-    toast(e.code === "alias-taken" ? "Ese alias ya está en uso" : fbError(e), "er");
-  } finally { busy(btn, false, "Crear enlace corto"); }
-};
-$("rCopy").onclick = () => lastLink && copy(shortUrl(lastLink.code));
-$("rOpen").onclick = () => lastLink && window.open(lastLink.originalUrl, "_blank", "noopener");
-$("rShare").onclick = () => share(lastLink.code);
-$("rQr").onclick = () => showQr(lastLink.code);
-async function share(code) {
-  if (navigator.share) { try { await navigator.share({title: "Enlace corto", url: shortUrl(code)}); } catch {} }
-  else copy(shortUrl(code));
+    if (e.name === "AbortError") throw new Error("TIMEOUT");
+    throw e;
+  } finally { clearTimeout(t); }
+}
+function errText(e) {
+  const m = {
+    NO_BACKEND: "El backend todavía no está configurado. Define API_BASE en este archivo cuando tengas tu servidor.",
+    RATE: "Has hecho demasiadas consultas. Espera un momento e inténtalo de nuevo.",
+    NOT_FOUND: "No se encontró ese jugador con el UID y la región indicados.",
+    PROVIDER: "El servicio de estadísticas no está disponible o no tiene una API autorizada conectada.",
+    TIMEOUT: "El servidor tardó demasiado en responder. Inténtalo otra vez."
+  };
+  return m[e.message] || "No se pudo completar la consulta. Revisa tu conexión e inténtalo de nuevo.";
+}
+let regionsCache = null;
+async function getRegions() {
+  if (regionsCache) return regionsCache;
+  try { const r = await api("/api/regions"); regionsCache = Array.isArray(r.regions) ? r.regions : []; }
+  catch { regionsCache = []; }
+  return regionsCache;
+}
+const validUid = u => /^\d{5,14}$/.test(u);
+
+/* ---------- Componentes ---------- */
+function regionSelect(id, regions) {
+  if (!regions.length) return `<select id="${id}" disabled aria-label="Región"><option>Sin regiones</option></select>`;
+  return `<select id="${id}" aria-label="Región">${regions.map(r => `<option value="${esc(r)}">${esc(r)}</option>`).join("")}</select>`;
+}
+function skeleton() { return `<div class="card"><div class="sk"></div></div><div class="grid"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div>`; }
+function pct(a, b) { return (typeof a === "number" && typeof b === "number" && b > 0) ? (a / b * 100) : null; }
+function block(title, o) {
+  o = o || {};
+  const wr = pct(o.wins, o.matches);
+  const kpm = (typeof o.kills === "number" && typeof o.matches === "number" && o.matches > 0) ? o.kills / o.matches : null;
+  return `<div class="stat"><small>${esc(title)}</small>
+    <div class="grid" style="margin-top:6px">
+      <div><small>Partidas</small><b>${num(o.matches)}</b></div>
+      <div><small>Victorias</small><b>${num(o.wins)}</b></div>
+      <div><small>Eliminaciones</small><b>${num(o.kills)}</b></div>
+      <div><small>% victorias (calculado)</small><b>${wr === null ? NA : wr.toFixed(1) + "%"}</b></div>
+      <div><small>Elim. por partida (calculado)</small><b>${kpm === null ? NA : kpm.toFixed(2)}</b></div>
+    </div>
+    ${wr === null ? "" : `<div class="bar" aria-hidden="true"><i style="width:${Math.min(100, wr)}%"></i></div>`}</div>`;
+}
+function modeCard(title, m) {
+  m = m || {};
+  const has = m.career || m.ranked || m.normal;
+  return `<section class="card"><h2>${esc(title)}</h2>${has
+    ? `<div class="grid" style="grid-template-columns:1fr">${m.career ? block("Carrera", m.career) : ""}${m.ranked ? block("Clasificatoria", m.ranked) : ""}${m.normal ? block("Normal", m.normal) : ""}</div>`
+    : `<p>${NA}</p>`}</section>`;
+}
+function profileHTML(d) {
+  const p = d.player || {};
+  const clan = p.clan && p.clan.name;
+  return `<section class="card">
+    <div class="row"><div class="who">
+      ${p.avatarUrl ? `<img class="ava" src="${esc(p.avatarUrl)}" alt="Avatar de ${esc(p.nickname)}" loading="lazy">` : `<div class="ava">Sin avatar</div>`}
+      <div><h2 style="margin:0">${p.nickname ? esc(p.nickname) : NA}</h2>
+        <div>UID <b>${esc(p.uid)}</b> <button class="ghost sm" id="copy-uid">Copiar UID</button></div>
+        <div>${typeof p.level === "number" ? `<span class="lvl">Nv. ${p.level}</span>` : ""} <span class="na">Región: ${p.region ? esc(p.region) : "No disponible"}</span></div>
+      </div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="ghost sm" id="btn-fav">★ Favorito</button>
+        <button class="sm" id="btn-card">Tarjeta para compartir</button>
+      </div></div>
+    <div class="grid" style="margin-top:12px">
+      <div class="stat"><small>Experiencia</small><b>${num(p.exp)}</b></div>
+      <div class="stat"><small>Clan</small><b>${clan ? esc(clan) : NA}</b></div>
+      <div class="stat"><small>Firma</small><b style="font-size:15px">${p.signature ? esc(p.signature) : NA}</b></div>
+    </div>
+    ${d.fetchedAt ? `<p class="na">Datos obtenidos el ${esc(new Date(d.fetchedAt).toLocaleString("es"))}${d.fromCache ? " (desde caché)" : ""}.</p>` : ""}
+  </section>${modeCard("Battle Royale", d.br)}${modeCard("Duelo de Escuadras", d.cs)}`;
 }
 
-/* ============ 7. CÓDIGO QR ============ */
-function showQr(code) {
-  const s = shortUrl(code);
-  QRCode.toCanvas($("qrCv"), s, {width: 280, margin: 2, color: {dark: "#17191C", light: "#E4E6EA"}}, err => {
-    if (err) return toast("No se pudo generar el QR", "er");
-    $("qrTxt").textContent = s; $("qrDlg").showModal();
-    $("qrDl").onclick = () => { const a = document.createElement("a"); a.href = $("qrCv").toDataURL("image/png"); a.download = "qr-" + code + ".png"; a.click(); };
+/* ---------- Páginas ---------- */
+async function pageHome() {
+  document.title = "Free Fire Profile Analyzer – Analiza perfiles por UID";
+  const regions = await getRegions();
+  app.innerHTML = `
+  <section class="hero">
+    <h1>Free Fire <b>Profile Analyzer</b></h1>
+    <p>Escribe el UID de un jugador, elige la región y revisa sus estadísticas reales. Sin cuenta y sin contraseñas.</p>
+    <form class="search" id="f-search">
+      <input id="uid" inputmode="numeric" placeholder="UID del jugador" aria-label="UID del jugador" required>
+      ${regionSelect("region", regions)}
+      <button type="submit">Analizar perfil</button>
+    </form>
+    ${regions.length ? "" : `<p class="na">Las regiones se cargan desde tu backend. Aún no hay ninguna disponible.</p>`}
+  </section>
+  <div id="result"></div>
+  <section class="card"><h2>Qué puedes hacer</h2>
+    <div class="grid">
+      <div class="stat"><b>Analizar</b><small>Datos del jugador y estadísticas de Battle Royale y Duelo de Escuadras.</small></div>
+      <div class="stat"><b>Comparar</b><small>Dos perfiles lado a lado.</small></div>
+      <div class="stat"><b>Guardar</b><small>Favoritos e historial con tu cuenta.</small></div>
+      <div class="stat"><b>Compartir</b><small>Tarjeta en imagen con el resumen.</small></div>
+    </div></section>
+  <section class="card"><h2>Preguntas frecuentes</h2>
+    <details><summary>¿Dónde encuentro mi UID?</summary><p>En tu perfil dentro del juego, bajo tu apodo.</p></details>
+    <details><summary>¿Piden mi contraseña?</summary><p>Nunca. Solo necesitas el UID y la región.</p></details>
+    <details><summary>¿Por qué aparece “No disponible”?</summary><p>Solo mostramos los datos que el servicio devuelve. Si un dato no llega, no lo inventamos.</p></details>
+    <details><summary>¿Hace falta cuenta?</summary><p>No para consultar. Sí para favoritos e historial.</p></details>
+  </section>`;
+  $("#f-search").addEventListener("submit", e => { e.preventDefault(); runSearch($("#uid").value.trim(), $("#region").value); });
+}
+
+let lastData = null;
+async function runSearch(uid, region) {
+  const out = $("#result");
+  if (!validUid(uid)) { out.innerHTML = `<p class="msg err" role="alert">El UID debe tener solo números (entre 5 y 14 dígitos).</p>`; return; }
+  out.innerHTML = skeleton();
+  try {
+    const d = await api(`/api/player?uid=${encodeURIComponent(uid)}&region=${encodeURIComponent(region)}`);
+    lastData = d;
+    out.innerHTML = profileHTML(d);
+    document.title = `Perfil ${d.player?.nickname || uid} – Free Fire Profile Analyzer`;
+    $("#copy-uid").onclick = async () => { try { await navigator.clipboard.writeText(String(d.player?.uid ?? uid)); $("#copy-uid").textContent = "Copiado"; } catch { $("#copy-uid").textContent = "No se pudo copiar"; } };
+    $("#btn-fav").onclick = () => addFavorite(d, uid, region);
+    $("#btn-card").onclick = () => shareCard(d);
+    saveHistory(d, uid, region);
+  } catch (e) { out.innerHTML = `<p class="msg err" role="alert">${esc(errText(e))}</p>`; }
+}
+
+async function pageCompare() {
+  document.title = "Comparar perfiles – Free Fire Profile Analyzer";
+  const regions = await getRegions();
+  app.innerHTML = `<h1 style="font-family:'Chakra Petch'">Comparar perfiles</h1>
+  <section class="card"><div class="grid">
+    <div><label for="u1">UID jugador 1</label><input id="u1" inputmode="numeric"><label for="r1">Región</label>${regionSelect("r1", regions)}</div>
+    <div><label for="u2">UID jugador 2</label><input id="u2" inputmode="numeric"><label for="r2">Región</label>${regionSelect("r2", regions)}</div>
+  </div><p><button id="go-cmp">Comparar</button></p></section><div id="cmp"></div>`;
+  $("#go-cmp").onclick = async () => {
+    const u1 = $("#u1").value.trim(), u2 = $("#u2").value.trim(), out = $("#cmp");
+    if (!validUid(u1) || !validUid(u2)) { out.innerHTML = `<p class="msg err" role="alert">Escribe dos UID válidos (solo números).</p>`; return; }
+    out.innerHTML = skeleton();
+    try {
+      const [a, b] = await Promise.all([api(`/api/player?uid=${u1}&region=${encodeURIComponent($("#r1").value)}`), api(`/api/player?uid=${u2}&region=${encodeURIComponent($("#r2").value)}`)]);
+      const ca = a.br?.career, cb = b.br?.career;
+      if (!ca || !cb) { out.innerHTML = `<p class="msg">Uno de los dos perfiles no tiene estadísticas de carrera disponibles, así que no se puede comparar.</p>`; return; }
+      const row = (n, x, y) => `<tr><td>${n}</td><td>${num(x)}</td><td>${num(y)}</td></tr>`;
+      const f = (o, k) => o?.[k];
+      const w = (o) => { const v = pct(o.wins, o.matches); return v === null ? null : +v.toFixed(1); };
+      out.innerHTML = `<section class="card"><table><tr><th>Battle Royale (carrera)</th><th>${esc(a.player?.nickname || u1)}</th><th>${esc(b.player?.nickname || u2)}</th></tr>
+        ${row("Nivel", a.player?.level, b.player?.level)}${row("Partidas", f(ca, "matches"), f(cb, "matches"))}${row("Victorias", f(ca, "wins"), f(cb, "wins"))}${row("Eliminaciones", f(ca, "kills"), f(cb, "kills"))}${row("% victorias (calculado)", w(ca), w(cb))}</table></section>`;
+    } catch (e) { out.innerHTML = `<p class="msg err" role="alert">${esc(errText(e))}</p>`; }
+  };
+}
+
+function needAuth(render) {
+  if (!fbOK) { app.innerHTML = `<p class="msg">Firebase no está configurado. Rellena FIREBASE_CONFIG en este archivo para usar cuentas.</p>`; return false; }
+  if (!user) { app.innerHTML = `<p class="msg">Inicia sesión para ver esta página.</p><button id="go-login">Iniciar sesión</button>`; $("#go-login").onclick = openAuth; return false; }
+  return true;
+}
+async function pageFavs() {
+  document.title = "Favoritos – Free Fire Profile Analyzer";
+  if (!needAuth()) return;
+  app.innerHTML = `<h1 style="font-family:'Chakra Petch'">Favoritos</h1><div id="lst">${skeleton()}</div>`;
+  try {
+    const s = await D.getDocs(D.query(D.collection(db, "favorites"), D.where("ownerUid", "==", user.uid)));
+    const items = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    $("#lst").innerHTML = items.length ? `<section class="card">${items.map(i => `<div class="list-item"><span><b>${esc(i.nickname || i.uid)}</b> <span class="na">UID ${esc(i.uid)} · ${esc(i.region)}</span></span><span><button class="ghost sm" data-open="${esc(i.uid)}|${esc(i.region)}">Abrir</button> <button class="ghost sm" data-del="${esc(i.id)}">Quitar</button></span></div>`).join("")}</section>` : `<p class="msg">Todavía no tienes favoritos. Guarda uno desde el resultado de una consulta.</p>`;
+    $("#lst").onclick = async e => {
+      const o = e.target.dataset.open, x = e.target.dataset.del;
+      if (o) { const [u, r] = o.split("|"); await pageHome(); $("#uid").value = u; if ($("#region")) $("#region").value = r; runSearch(u, r); }
+      if (x) { await D.deleteDoc(D.doc(db, "favorites", x)); pageFavs(); }
+    };
+  } catch { $("#lst").innerHTML = `<p class="msg err">No se pudieron cargar los favoritos.</p>`; }
+}
+async function pageHistory() {
+  document.title = "Historial – Free Fire Profile Analyzer";
+  if (!needAuth()) return;
+  app.innerHTML = `<h1 style="font-family:'Chakra Petch'">Historial</h1><div id="lst">${skeleton()}</div>`;
+  try {
+    const s = await D.getDocs(D.query(D.collection(db, "searchHistory"), D.where("userUid", "==", user.uid), D.limit(100)));
+    const items = s.docs.map(d => d.data()).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)).slice(0, 50);
+    $("#lst").innerHTML = items.length ? `<section class="card">${items.map(i => `<div class="list-item"><span><b>${esc(i.nickname || i.uid)}</b> <span class="na">UID ${esc(i.uid)} · ${esc(i.region)}${i.createdAt ? " · " + esc(new Date(i.createdAt.seconds * 1000).toLocaleString("es")) : ""}</span></span></div>`).join("")}</section>` : `<p class="msg">Tu historial está vacío.</p>`;
+  } catch { $("#lst").innerHTML = `<p class="msg err">No se pudo cargar el historial.</p>`; }
+}
+function pagePrivacy() {
+  document.title = "Privacidad – Free Fire Profile Analyzer";
+  app.innerHTML = `<h1 style="font-family:'Chakra Petch'">Privacidad</h1><section class="card">
+  <p>Esta web no pide contraseñas de Free Fire ni las guarda. Para consultar un perfil solo se usan el UID y la región.</p>
+  <p>Si creas una cuenta, guardamos tu correo y tus favoritos e historial, visibles únicamente para ti.</p>
+  <p>Edita este texto con tus datos legales reales antes de publicar.</p></section>`;
+}
+
+/* ---------- Favoritos / historial / tarjeta ---------- */
+async function addFavorite(d, uid, region) {
+  const b = $("#btn-fav");
+  if (!user) { openAuth(); return; }
+  try {
+    await D.addDoc(D.collection(db, "favorites"), { ownerUid: user.uid, uid: String(d.player?.uid ?? uid), region, nickname: d.player?.nickname || null, savedAt: D.serverTimestamp() });
+    b.textContent = "★ Guardado";
+  } catch { b.textContent = "Error al guardar"; }
+}
+async function saveHistory(d, uid, region) {
+  if (!user || !db) return;
+  try { await D.addDoc(D.collection(db, "searchHistory"), { userUid: user.uid, uid: String(uid), region, nickname: d.player?.nickname || null, createdAt: D.serverTimestamp() }); } catch {}
+}
+function shareCard(d) {
+  const p = d.player || {}, c = d.br?.career || {};
+  const cv = document.createElement("canvas"); cv.width = 1080; cv.height = 566;
+  const x = cv.getContext("2d");
+  const g = x.createLinearGradient(0, 0, 1080, 566); g.addColorStop(0, "#2a0e0a"); g.addColorStop(1, "#0d0a0a");
+  x.fillStyle = g; x.fillRect(0, 0, 1080, 566);
+  x.fillStyle = "#ff8a1f"; x.fillRect(0, 0, 14, 566);
+  x.fillStyle = "#ffc83d"; x.font = "700 54px sans-serif"; x.fillText(String(p.nickname || "Jugador"), 60, 120);
+  x.fillStyle = "#a89a90"; x.font = "28px sans-serif"; x.fillText("UID " + (p.uid ?? "—") + (p.region ? "  ·  " + p.region : ""), 60, 170);
+  const t = v => (typeof v === "number" ? v.toLocaleString("es") : "No disponible");
+  const items = [["Nivel", p.level], ["Partidas", c.matches], ["Victorias", c.wins], ["Eliminaciones", c.kills]];
+  items.forEach((it, i) => {
+    const px = 60 + i * 250;
+    x.fillStyle = "#171212"; x.fillRect(px, 240, 230, 150);
+    x.fillStyle = "#a89a90"; x.font = "24px sans-serif"; x.fillText(it[0], px + 18, 285);
+    x.fillStyle = "#f3ece6"; x.font = "700 " + (typeof it[1] === "number" ? 44 : 24) + "px sans-serif"; x.fillText(t(it[1]), px + 18, 350);
   });
+  x.fillStyle = "#a89a90"; x.font = "24px sans-serif"; x.fillText("Free Fire Profile Analyzer", 60, 520);
+  const a = document.createElement("a"); a.download = `perfil-${p.uid || "ff"}.png`; a.href = cv.toDataURL("image/png"); a.click();
 }
-$("qrX").onclick = () => $("qrDlg").close();
 
-/* ============ 8. PANEL ============ */
-let links = [];
-async function loadDash() {
-  const u = auth.currentUser; if (!u) return;
-  $("list").innerHTML = '<p class="mut" style="margin-top:12px">Cargando…</p>';
-  try {
-    const snap = await getDocs(query(collection(db, "links"), where("ownerUid", "==", u.uid)));
-    links = snap.docs.map(d => d.data()).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-    renderDash();
-  } catch (e) { $("list").innerHTML = ""; toast(fbError(e), "er"); }
+/* ---------- Autenticación ---------- */
+const dlg = $("#dlg-auth"); let registerMode = false;
+function openAuth() {
+  if (!fbOK) { alert("Firebase no está configurado. Rellena FIREBASE_CONFIG en el archivo."); return; }
+  $("#a-err").classList.add("hide"); dlg.showModal();
 }
-function renderDash() {
-  $("sT").textContent = links.length;
-  $("sC").textContent = links.reduce((a, l) => a + (l.clicks || 0), 0);
-  $("sA").textContent = links.filter(l => l.active).length;
-  const q = $("q").value.toLowerCase(), fs = $("fs").value, fd = $("fd").value;
-  const min = fd === "all" ? 0 : Date.now() / 1000 - fd * 86400;
-  const rows = links.filter(l => (!q || l.code.toLowerCase().includes(q) || l.originalUrl.toLowerCase().includes(q))
-    && (fs === "all" || (fs === "on") === !!l.active) && (l.createdAt?.seconds || 0) >= min);
-  if (!links.length) { $("list").innerHTML = '<p class="mut" style="margin-top:14px">Aún no tienes enlaces. Crea el primero en Inicio.</p>'; return; }
-  if (!rows.length) { $("list").innerHTML = '<p class="mut" style="margin-top:14px">Ningún enlace coincide con los filtros.</p>'; return; }
-  $("list").innerHTML = rows.map(l => `<div class="item"><b>${esc(shortUrl(l.code))}</b>
-    <span class="tag">${l.active ? "Activo" : "Desactivado"}</span> <span class="tag">${l.clicks || 0} clics</span>
-    <div class="u">${esc(l.originalUrl)}</div>
-    <div class="mut" style="font-size:12px">${l.createdAt ? new Date(l.createdAt.seconds * 1000).toLocaleString() : ""}</div>
-    <div class="row" style="margin-top:10px" data-c="${esc(l.code)}">
-      <button class="btn sec" data-a="copy">Copiar</button><button class="btn sec" data-a="open">Abrir</button>
-      <button class="btn sec" data-a="qr">QR</button><button class="btn sec" data-a="alias">Editar alias</button>
-      <button class="btn sec" data-a="tog">${l.active ? "Desactivar" : "Activar"}</button><button class="btn dan" data-a="del">Eliminar</button>
-    </div></div>`).join("");
+function authErr(m) { const e = $("#a-err"); e.textContent = m; e.classList.remove("hide"); }
+function authMsg(e) {
+  const c = e.code || "";
+  if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")) return "Correo o contraseña incorrectos.";
+  if (c.includes("email-already")) return "Ese correo ya tiene una cuenta. Inicia sesión.";
+  if (c.includes("weak-password")) return "La contraseña debe tener al menos 6 caracteres.";
+  if (c.includes("invalid-email")) return "El correo no es válido.";
+  return "No se pudo completar la acción. Inténtalo de nuevo.";
 }
-["q", "fs", "fd"].forEach(i => $(i).oninput = renderDash);
-
-$("list").onclick = async e => {
-  const b = e.target.closest("button[data-a]"); if (!b) return;
-  const code = b.parentElement.dataset.c, l = links.find(x => x.code === code), a = b.dataset.a;
+$("#btn-login").onclick = openAuth;
+$("#a-close").onclick = () => dlg.close();
+$("#a-toggle").onclick = () => {
+  registerMode = !registerMode;
+  $("#auth-title").textContent = registerMode ? "Crear cuenta" : "Iniciar sesión";
+  $("#a-submit").textContent = registerMode ? "Crear cuenta" : "Entrar";
+  $("#a-toggle").textContent = registerMode ? "Ya tengo cuenta" : "Crear una cuenta";
+};
+$("#a-submit").onclick = async () => {
+  const m = $("#a-mail").value.trim(), p = $("#a-pass").value;
+  if (!m || !p) return authErr("Escribe tu correo y tu contraseña.");
   try {
-    if (a === "copy") copy(shortUrl(code));
-    else if (a === "open") window.open(l.originalUrl, "_blank", "noopener");
-    else if (a === "qr") showQr(code);
-    else if (a === "tog") { await updateDoc(doc(db, "links", code), {active: !l.active}); toast("Estado actualizado", "ok"); loadDash(); }
-    else if (a === "del") {
-      if (!confirm("¿Eliminar este enlace? Dejará de funcionar y no se puede deshacer.")) return;
-      await deleteDoc(doc(db, "links", code)); toast("Enlace eliminado", "ok"); loadDash();
-    } else if (a === "alias") {
-      const n = (prompt("Nuevo alias (3–30: letras, números, - _).\nAviso: el contador de clics de este enlace se reinicia a 0 y el código anterior dejará de funcionar.", code) || "").trim();
-      if (!n || n === code) return;
-      if (!/^[a-zA-Z0-9_-]{3,30}$/.test(n) || RESERVED.includes(n.toLowerCase())) return toast("Alias no válido", "er");
-      if ((await getDoc(doc(db, "links", n))).exists()) return toast("Ese alias ya está en uso", "er");
-      const batch = writeBatch(db);
-      batch.set(doc(db, "links", n), {code: n, originalUrl: l.originalUrl, createdAt: serverTimestamp(), clicks: 0, ownerUid: auth.currentUser.uid, active: l.active});
-      batch.delete(doc(db, "links", code));
-      await batch.commit(); toast("Alias actualizado", "ok"); loadDash();
-    }
-  } catch (err) { toast(fbError(err), "er"); }
+    if (registerMode) {
+      const c = await A.createUserWithEmailAndPassword(auth, m, p);
+      await D.setDoc(D.doc(db, "users", c.user.uid), { displayName: c.user.displayName || null, avatarUrl: null, createdAt: D.serverTimestamp(), preferences: {} });
+    } else await A.signInWithEmailAndPassword(auth, m, p);
+    dlg.close();
+  } catch (e) { authErr(authMsg(e)); }
 };
-
-/* ============ 9. AUTENTICACIÓN ============ */
-let registering = false;
-$("aSwap").onclick = () => {
-  registering = !registering;
-  $("aTitle").textContent = registering ? "Crear cuenta" : "Iniciar sesión";
-  $("aGo").textContent = registering ? "Registrarme" : "Entrar";
-  $("aSwap").textContent = registering ? "Ya tengo cuenta" : "Crear cuenta";
-};
-$("aGo").onclick = async () => {
-  const em = $("em").value.trim(), pw = $("pw").value;
-  if (!em || !pw) return toast("Completa correo y contraseña", "er");
-  busy($("aGo"), true, "Un momento…");
+$("#a-google").onclick = async () => {
   try {
-    await (registering ? createUserWithEmailAndPassword : signInWithEmailAndPassword)(auth, em, pw);
-    toast(registering ? "Cuenta creada" : "Sesión iniciada", "ok"); $("pw").value = ""; show("dash");
-  } catch (e) { toast(fbError(e), "er"); }
-  finally { busy($("aGo"), false, registering ? "Registrarme" : "Entrar"); }
+    const c = await A.signInWithPopup(auth, new A.GoogleAuthProvider());
+    await D.setDoc(D.doc(db, "users", c.user.uid), { displayName: c.user.displayName || null, avatarUrl: c.user.photoURL || null, createdAt: D.serverTimestamp(), preferences: {} }, { merge: true });
+    dlg.close();
+  } catch (e) { authErr(authMsg(e)); }
 };
-$("aReset").onclick = async e => {
-  e.preventDefault(); const em = $("em").value.trim();
-  if (!em) return toast("Escribe tu correo arriba primero", "er");
-  try { await sendPasswordResetEmail(auth, em); toast("Te enviamos un correo para restablecerla", "ok"); }
-  catch (err) { toast(fbError(err), "er"); }
+$("#a-reset").onclick = async () => {
+  const m = $("#a-mail").value.trim();
+  if (!m) return authErr("Escribe tu correo y pulsa de nuevo.");
+  try { await A.sendPasswordResetEmail(auth, m); authErr("Te enviamos un correo para restablecer la contraseña."); } catch (e) { authErr(authMsg(e)); }
 };
-$("aOut").onclick = async () => { await signOut(auth); toast("Sesión cerrada"); show("home"); };
-onAuthStateChanged(auth, u => {
-  $("who").textContent = u ? u.email : "Invitado";
-  $("authBtn").textContent = u ? "Mi cuenta" : "Entrar";
-  ["em", "pw", "aGo", "aSwap", "aReset"].forEach(i => $(i).closest("div,p,label") && 0);
-  $("aOut").classList.toggle("hide", !u);
-  if (!u) { links = []; if (!$("v-dash").classList.contains("hide")) show("home"); }
-});
+$("#btn-logout").onclick = async () => { await A.signOut(auth); location.hash = "#/"; };
 
-/* ============ 10. ARRANQUE ============ */
-const r = new URLSearchParams(location.search).get("r");
-if (r) handleRedirect(r.trim());
+/* ---------- Router ---------- */
+function route() {
+  const h = location.hash || "#/";
+  if (h.startsWith("#/comparar")) return pageCompare();
+  if (h.startsWith("#/favoritos")) return pageFavs();
+  if (h.startsWith("#/historial")) return pageHistory();
+  if (h.startsWith("#/privacidad")) return pagePrivacy();
+  return pageHome();
+}
+window.addEventListener("hashchange", route);
+route();
+initFirebase();
 </script>
 </body>
 </html>
