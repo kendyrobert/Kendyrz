@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "https://kendy-57bcd.web.app",
+      "https://kendy-57bcd.firebaseapp.com",
+      "http://localhost:5000"
+    ],
+    "method": ["GET", "HEAD"],
+    "maxAgeSeconds": 3600
+  }
+]
