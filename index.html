@@ -1,265 +1,562 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Media a MP4</title>
+<meta name="theme-color" content="#0b0d12">
+<title>KendyLink · Convierte tus archivos en enlaces</title>
 <style>
-  :root{--bg:#0f1115;--card:#171a21;--line:#2a2f3a;--txt:#e8eaf0;--mut:#8b93a5;--acc:#6c8cff;--ok:#3ecf8e;--err:#ff6b6b}
+  :root{--bg:#0b0d12;--bg2:#11141b;--card:#161a23;--line:#262c38;--txt:#eceef4;--mut:#8e97aa;--acc:#6c8cff;--acc2:#a56cff;--ok:#3ecf8e;--err:#ff6b6b;--shadow:0 10px 30px #0006}
+  [data-theme=light]{--bg:#f4f5fa;--bg2:#ffffff;--card:#ffffff;--line:#e2e5ee;--txt:#161922;--mut:#667085;--shadow:0 10px 30px #1a2a6c18}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:20px 16px 60px}
-  .wrap{max-width:720px;margin:0 auto}
-  h1{font-size:1.5rem;margin:8px 0 4px}
-  p.sub{color:var(--mut);margin:0 0 20px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
-  label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
-  select,input[type=text],input[type=number]{width:100%;padding:10px 12px;background:#0f1115;border:1px solid var(--line);border-radius:8px;color:var(--txt);font:inherit}
-  .drop{border:2px dashed var(--line);border-radius:14px;padding:36px 16px;text-align:center;cursor:pointer;transition:.2s}
-  .drop.over{border-color:var(--acc);background:#6c8cff14}
-  .drop b{display:block;font-size:1.05rem;margin-bottom:4px}
-  .drop span{color:var(--mut);font-size:.9rem}
-  .item{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
-  .item:first-child{border-top:0;padding-top:0;margin-top:0}
-  .name{font-weight:600;word-break:break-all}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+  a{color:var(--acc);text-decoration:none}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+  /* header */
+  .top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .top .wrap{display:flex;align-items:center;gap:10px;height:58px}
+  .brand{font-weight:800;font-size:1.15rem;color:var(--txt);display:flex;align-items:center;gap:8px}
+  .brand i{font-style:normal;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:9px;width:30px;height:30px;display:grid;place-items:center;font-size:1rem}
+  .top nav{display:flex;gap:4px;margin-left:12px}
+  .top nav a{color:var(--mut);padding:6px 10px;border-radius:8px;font-size:.92rem}
+  .top nav a:hover{color:var(--txt);background:var(--line)}
+  .sp{flex:1}
+  .icon{background:transparent;border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:10px;padding:0;font-size:1.05rem}
+  .user{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--mut)}
+  .user b{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff}
+  .user span{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:640px){.top nav{display:none}.user span{display:none}}
+  /* buttons / inputs */
+  button,.btn{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:10px;padding:10px 16px;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2));display:inline-block;text-align:center}
+  button.sec,.btn.sec{background:var(--line);color:var(--txt)}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  button.sm,.btn.sm{padding:7px 11px;font-size:.82rem;border-radius:8px}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  label{display:block;font-size:.82rem;color:var(--mut);margin:12px 0 4px}
+  input,select,textarea{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--txt);font:inherit}
+  textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;resize:vertical}
+  input[readonly]{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem}
+  .row{display:flex;gap:8px;align-items:flex-start}
+  .row>input,.row>textarea{flex:1;min-width:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+  .note{font-size:.82rem;color:var(--mut)}
+  code{background:var(--bg);padding:1px 6px;border-radius:5px;font-size:.85em}
+  /* hero */
+  .hero{padding:56px 0 34px;text-align:center;background:radial-gradient(700px 300px at 20% 0,#6c8cff22,transparent),radial-gradient(600px 300px at 85% 10%,#a56cff22,transparent)}
+  .hero h1{font-size:clamp(1.9rem,6vw,3.2rem);line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+  .hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{max-width:620px;margin:0 auto 22px;color:var(--mut);font-size:1.08rem}
+  .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .cta .btn,.cta button{padding:13px 22px;font-size:1rem}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+  .chip{border:1px solid var(--line);background:var(--card);color:var(--mut);padding:5px 12px;border-radius:99px;font-size:.8rem}
+  .chip.ok{color:var(--ok)}
+  section.blk{padding:34px 0}
+  section.blk h2{font-size:1.5rem;margin:0 0 4px}
+  section.blk>.wrap>p{color:var(--mut);margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .tcard{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;color:var(--txt);transition:.15s}
+  .tcard:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:var(--shadow)}
+  .tcard .ti{font-size:1.8rem;display:block;margin-bottom:8px}
+  .tcard b{display:block;font-size:1.02rem}
+  .tcard span.d{color:var(--mut);font-size:.86rem}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .step b.n{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;margin-bottom:8px}
+  .types{display:flex;flex-wrap:wrap;gap:8px}
+  .types span{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 11px;font-size:.84rem;font-family:ui-monospace,Menlo,monospace}
+  footer{border-top:1px solid var(--line);padding:26px 0 50px;color:var(--mut);font-size:.85rem;text-align:center}
+  /* tool view */
+  .tool{padding:22px 0 60px}
+  .back{background:transparent;color:var(--mut);padding:6px 0;font-weight:500}
+  .tool h2{font-size:1.6rem;margin:6px 0 2px}
+  .tool>p{color:var(--mut);margin:0 0 16px}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .opts label{margin-top:0}
+  .drop{border:2px dashed var(--line);border-radius:18px;padding:40px 16px;text-align:center;cursor:pointer;transition:.2s;background:var(--card)}
+  .drop.over,.drop:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+  .drop .big{font-size:2.4rem}
+  .drop b{display:block;font-size:1.05rem;margin:4px 0}
+  .drop span{color:var(--mut);font-size:.88rem}
+  #results{margin-top:16px}
+  .name{font-weight:700;word-break:break-all}
   .meta{color:var(--mut);font-size:.82rem}
-  .prev{margin:10px 0}
-  .prev img,.prev video{max-width:100%;max-height:260px;border-radius:10px;display:block}
+  .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0 6px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .15s}
+  .st-ok{color:var(--ok)}.st-err{color:var(--err)}
+  .prev{margin:12px 0}
+  .prev img,.prev video{max-width:100%;max-height:280px;border-radius:12px;display:block}
   .prev audio{width:100%}
-  .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0}
-  .bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .15s}
-  .row{display:flex;gap:8px;margin-top:6px}
-  .row input{flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem}
-  button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer}
-  button.sec{background:#262b36;color:var(--txt)}
-  .st-ok{color:var(--ok)} .st-err{color:var(--err)}
-  details summary{cursor:pointer;color:var(--mut);font-size:.9rem}
-  .note{font-size:.82rem;color:var(--mut);margin-top:8px}
-  code{background:#0f1115;padding:1px 5px;border-radius:4px}
+  .main{background:color-mix(in srgb,var(--acc) 9%,var(--bg));border:1px solid color-mix(in srgb,var(--acc) 40%,var(--line));border-radius:12px;padding:12px;margin:10px 0}
+  .main label{margin-top:0;color:var(--acc);font-weight:700}
+  .acts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  details.grp{border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--bg2)}
+  details.grp summary{cursor:pointer;padding:11px 14px;font-weight:600;font-size:.93rem;list-style:none}
+  details.grp summary::before{content:"▸ ";color:var(--mut)}
+  details.grp[open] summary::before{content:"▾ "}
+  details.grp .in{padding:0 14px 14px}
+  .share{display:flex;flex-wrap:wrap;gap:8px;padding-top:4px}
+  .qr{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .qr img{width:150px;height:150px;border-radius:10px;background:#fff;padding:6px}
+  /* history */
+  .hitem{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:10px}
+  .hthumb{width:56px;height:56px;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-size:1.5rem;overflow:hidden;flex:none}
+  .hthumb img{width:100%;height:100%;object-fit:cover}
+  .hinfo{flex:1;min-width:0}
+  .hinfo .name{font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hbtn{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .hdet{margin:-4px 0 12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .filters input{flex:2;min-width:160px}.filters select{flex:1;min-width:120px}
+  .badge{font-size:.7rem;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--mut);margin-left:6px}
+  .banner{border:1px solid color-mix(in srgb,var(--acc) 40%,var(--line));background:color-mix(in srgb,var(--acc) 9%,var(--card));border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:.9rem}
+  /* dialogs, toasts */
+  dialog{background:var(--card);color:var(--txt);border:1px solid var(--line);border-radius:18px;padding:20px;width:min(420px,calc(100vw - 28px));box-shadow:var(--shadow)}
+  dialog::backdrop{background:#000a}
+  dialog h3{margin:0 0 4px}
+  .tabs{display:flex;gap:6px;margin:12px 0}
+  .tabs button{flex:1}
+  .gbtn{width:100%;background:#fff;color:#222;border:1px solid #ddd}
+  .or{text-align:center;color:var(--mut);font-size:.8rem;margin:12px 0 0}
+  #toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;width:min(420px,calc(100vw - 24px))}
+  .toast{background:var(--txt);color:var(--bg);padding:11px 14px;border-radius:12px;font-size:.9rem;box-shadow:var(--shadow);animation:in .2s}
+  .toast.err{background:var(--err);color:#fff}.toast.ok{background:var(--ok);color:#06220f}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>🎞️ Media a MP4</h1>
-  <p class="sub">Sube una foto, vídeo o música y obtén siempre un enlace directo <b>.mp4</b> para usarlo en otra web o app.</p>
+<header class="top"><div class="wrap">
+  <a class="brand" href="#/"><i>🔗</i>KendyLink</a>
+  <nav><a href="#/">Inicio</a><a href="#/history">Historial</a></nav>
+  <div class="sp"></div>
+  <button class="icon" data-act="theme" title="Tema claro/oscuro">🌓</button>
+  <button class="icon" data-act="settings" title="Ajustes">⚙️</button>
+  <div id="authBox"></div>
+</div></header>
 
-  <div class="card">
-    <label for="prov">Servicio de alojamiento</label>
-    <select id="prov">
-      <option value="tmpfiles">tmpfiles.org — gratis, sin registro (dura 1 hora)</option>
-      <option value="cloudinary">Cloudinary — permanente (necesita cuenta gratis)</option>
-      <option value="local">Local — solo funciona en esta pestaña</option>
-    </select>
-    <div id="cldBox" style="display:none">
-      <label>Cloud name</label><input type="text" id="cldName" placeholder="mi-cloud">
-      <label>Upload preset (tipo "Unsigned")</label><input type="text" id="cldPreset" placeholder="mi_preset">
-      <p class="note">En Cloudinary: Settings → Upload → Add upload preset → Signing mode: <code>Unsigned</code>. Se guarda solo en tu navegador.</p>
-    </div>
-    <label for="dur">Duración del vídeo cuando subes una foto (segundos)</label>
-    <input type="number" id="dur" min="1" max="60" value="5">
-  </div>
+<main id="app"></main>
+<div id="toasts"></div>
 
-  <div class="drop" id="drop" tabindex="0">
-    <b>Arrastra archivos aquí o toca para elegir</b>
-    <span>Fotos, vídeos y audio → se convierten a MP4</span>
-    <input type="file" id="file" accept="image/*,video/*,audio/*" multiple hidden>
-  </div>
+<dialog id="authDlg">
+  <h3>Tu cuenta</h3>
+  <p class="note" style="margin:0">Es opcional. Con cuenta guardas tu historial de enlaces en la nube y lo ves desde cualquier dispositivo.</p>
+  <button class="gbtn" style="margin-top:14px" data-act="google">🔵 Continuar con Google</button>
+  <div class="or">— o con correo —</div>
+  <div class="tabs"><button class="sec" id="tabIn" data-act="authmode" data-m="in">Entrar</button><button class="ghost" id="tabUp" data-act="authmode" data-m="up">Crear cuenta</button></div>
+  <form id="authForm">
+    <label>Correo</label><input type="email" id="aMail" autocomplete="email" required>
+    <label>Contraseña</label><input type="password" id="aPass" autocomplete="current-password" minlength="6" required>
+    <div class="note" id="aErr" style="color:var(--err);min-height:1.2em;margin-top:8px"></div>
+    <div class="row" style="margin-top:8px"><button type="submit" id="aGo" style="flex:1">Entrar</button><button type="button" class="sec" data-act="close">Cerrar</button></div>
+    <p class="note" style="text-align:center;margin:12px 0 0"><a href="#" data-act="reset">¿Olvidaste tu contraseña?</a></p>
+  </form>
+</dialog>
 
-  <div class="card" id="list" style="display:none;margin-top:16px"></div>
+<dialog id="setDlg">
+  <h3>Ajustes de Cloudinary</h3>
+  <p class="note" style="margin:0">Ya vienen configurados. Cámbialos solo si quieres usar tu propia cuenta.</p>
+  <label>Cloud name</label><input id="sCloud">
+  <label>Upload preset (debe ser <code>Unsigned</code>)</label><input id="sPreset">
+  <div class="row" style="margin-top:14px"><button data-act="savecfg" style="flex:1">Guardar</button><button class="sec" data-act="resetcfg">Restablecer</button><button class="ghost" data-act="close">Cerrar</button></div>
+</dialog>
 
-  <div class="card">
-    <details>
-      <summary>¿Cómo funciona?</summary>
-      <p class="note">
-      • <b>Vídeo MP4</b>: se sube tal cual.<br>
-      • <b>Vídeo en otro formato</b> (MOV, WebM…): se reconvierte a MP4 en tu navegador, en tiempo real.<br>
-      • <b>Foto</b>: se convierte en un MP4 de los segundos que elijas.<br>
-      • <b>Música</b>: se convierte en un MP4 con una visualización de ondas y el audio.<br><br>
-      La conversión usa tu navegador y necesita que soporte grabar MP4 (Chrome, Edge y Safari recientes). Firefox no puede.<br>
-      Una página HTML sola no guarda archivos en internet, por eso el MP4 resultante se envía a un servicio de alojamiento que devuelve el enlace.</p>
-    </details>
-  </div>
-</div>
+<noscript><p style="padding:20px">Necesitas activar JavaScript.</p></noscript>
 
-<script>
-const $ = s => document.querySelector(s);
-const prov = $('#prov'), drop = $('#drop'), fileIn = $('#file'), list = $('#list');
-const store = {
-  get(k){ try{return localStorage.getItem(k)||''}catch(e){return ''} },
-  set(k,v){ try{localStorage.setItem(k,v)}catch(e){} }
+<script type="module">
+/* ============ utilidades ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ls={get(k,d=null){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const fmtB=b=>b>=1e9?(b/1e9).toFixed(2)+' GB':b>=1e6?(b/1e6).toFixed(1)+' MB':Math.max(1,Math.round(b/1e3))+' KB';
+const toast=(m,t='')=>{const d=document.createElement('div');d.className='toast '+t;d.textContent=m;$('#toasts').append(d);setTimeout(()=>d.remove(),4200)};
+const copyText=async v=>{try{await navigator.clipboard.writeText(v)}catch(e){const t=document.createElement('textarea');t.value=v;document.body.append(t);t.select();document.execCommand('copy');t.remove()}toast('Copiado ✔','ok')};
+const app=$('#app');
+
+const DEFAULTS={cloud:'dkryox5u',preset:'KendyR'};
+const cfg=Object.assign({},DEFAULTS,ls.get('kl_cfg',{}));
+document.documentElement.dataset.theme=ls.get('kl_theme',matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+
+const firebaseConfig={
+  apiKey:"AIzaSyAWr9YM0YAG0mx0SEk3qNEhjeS1MOu_2lg",
+  authDomain:"kendy-57bcd.firebaseapp.com",
+  projectId:"kendy-57bcd",
+  storageBucket:"kendy-57bcd.firebasestorage.app",
+  messagingSenderId:"678778497788",
+  appId:"1:678778497788:web:1e26e4c5be5c60f2f98579",
+  measurementId:"G-KKW9TV2H8J"
 };
-prov.value = store.get('prov') || 'tmpfiles';
-$('#cldName').value = store.get('cldName'); $('#cldPreset').value = store.get('cldPreset');
-function syncUI(){ $('#cldBox').style.display = prov.value==='cloudinary' ? 'block':'none'; store.set('prov',prov.value); }
-prov.onchange = syncUI; syncUI();
-$('#cldName').oninput = e => store.set('cldName', e.target.value.trim());
-$('#cldPreset').oninput = e => store.set('cldPreset', e.target.value.trim());
 
-drop.onclick = () => fileIn.click();
-drop.onkeydown = e => { if(e.key==='Enter'||e.key===' ') fileIn.click(); };
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => handle(e.dataTransfer.files));
-fileIn.onchange = () => { handle(fileIn.files); fileIn.value=''; };
+/* ============ herramientas ============ */
+const TOOLS=[
+ {id:'video',icon:'🎬',title:'Vídeo → enlace',desc:'MP4, WebM, HLS, DASH, GIF, miniatura y audio',type:'upload',accept:'video/*',opts:['w'],hint:'MP4, MOV, WebM, MKV…'},
+ {id:'image',icon:'🖼️',title:'Foto → enlace',desc:'JPG, PNG, WebP, AVIF, redimensionar y miniaturas',type:'upload',accept:'image/*',opts:['w','fmt'],hint:'JPG, PNG, WebP, GIF, HEIC…'},
+ {id:'audio',icon:'🎵',title:'Música → enlace',desc:'MP3, M4A, OGG, WAV',type:'upload',accept:'audio/*',hint:'MP3, WAV, M4A, OGG, FLAC…'},
+ {id:'gif',icon:'👾',title:'Vídeo → GIF',desc:'Convierte un vídeo en GIF animado',type:'upload',accept:'video/*',focus:'gif',hint:'Se genera un GIF de hasta 8 segundos'},
+ {id:'v2mp3',icon:'🎧',title:'Extraer audio (MP3)',desc:'Saca el sonido de cualquier vídeo',type:'upload',accept:'video/*',focus:'mp3',hint:'Sube un vídeo y recibes el MP3'},
+ {id:'compress',icon:'🗜️',title:'Comprimir y optimizar',desc:'Fotos y vídeos más ligeros, misma calidad',type:'upload',accept:'image/*,video/*',focus:'opt',opts:['w'],hint:'Foto o vídeo'},
+ {id:'img2mp4',icon:'📽️',title:'Foto → vídeo MP4',desc:'Convierte una foto en un MP4 con duración',type:'convert',accept:'image/*',opts:['dur'],hint:'Una o varias fotos'},
+ {id:'aud2mp4',icon:'🎼',title:'Música → vídeo MP4',desc:'MP4 con ondas animadas y tu audio',type:'convert',accept:'audio/*',hint:'Se convierte en tiempo real'},
+ {id:'url',icon:'🌐',title:'Desde una URL',desc:'Pega un enlace y lo alojamos en tu Cloudinary',type:'url'},
+ {id:'file',icon:'📄',title:'Cualquier archivo',desc:'PDF, ZIP, DOC… enlace directo o de descarga',type:'upload',accept:'*/*',hint:'Detecta el tipo automáticamente'},
+ {id:'qr',icon:'🔳',title:'Generador de QR',desc:'Crea un QR de cualquier enlace o texto',type:'qr'}
+];
+const LINKTYPES=['MP4','WebM','HLS .m3u8','DASH .mpd','GIF','MP3','M4A','OGG','WAV','JPG','PNG','WebP','AVIF','Miniatura','Descarga directa','QR','HTML <video>','HTML <audio>','HTML <img>','<picture>','iframe','Markdown','BBCode','Open Graph','JSON','cURL','Flutter','Android','Swift','Unity','Python','WhatsApp','Telegram','X','Facebook','Reddit','LinkedIn','Email'];
 
-const fmt = b => b>1e6 ? (b/1e6).toFixed(1)+' MB' : Math.max(1,Math.round(b/1e3))+' KB';
-const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const even = n => Math.max(2, Math.round(n/2)*2);
-const fit = (w,h) => { const s = Math.min(1, 1280/Math.max(w,h)); return [even(w*s), even(h*s)]; };
+/* ============ estado: auth e historial ============ */
+let fb=null,user=null,currentTool=null;
+const RECS=new Map();
 
-/* ---------- conversión a MP4 ---------- */
-const MIMES = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'];
-const mp4Mime = () => window.MediaRecorder ? MIMES.find(m => MediaRecorder.isTypeSupported(m)) : null;
-
-function record(stream, mime, stopPromise){
-  return new Promise((res, rej) => {
-    const rec = new MediaRecorder(stream, {mimeType: mime, videoBitsPerSecond: 4e6, audioBitsPerSecond: 128e3});
-    const chunks = [];
-    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
-    rec.onerror = e => rej(e.error || new Error('Error al grabar el MP4'));
-    rec.onstop = () => res(new Blob(chunks, {type: 'video/mp4'}));
-    rec.start(500);
-    stopPromise.then(() => new Promise(r => setTimeout(r, 300))).then(() => rec.state !== 'inactive' && rec.stop(), rej);
-  });
-}
-
-async function imageToMp4(file, mime, seconds, onP){
-  const url = URL.createObjectURL(file);
-  const img = new Image(); img.src = url;
-  await img.decode().catch(() => { throw new Error('No se puede leer la imagen (¿HEIC?).'); });
-  const [W,H] = fit(img.naturalWidth, img.naturalHeight);
-  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-  const cx = cv.getContext('2d');
-  let on = true; const t0 = performance.now();
-  (function loop(){ if(!on) return; cx.drawImage(img,0,0,W,H); onP(Math.min(99,(performance.now()-t0)/(seconds*10))); requestAnimationFrame(loop); })();
-  const stream = cv.captureStream(30);
-  const blob = await record(stream, mime, new Promise(r => setTimeout(r, seconds*1000)));
-  on = false; URL.revokeObjectURL(url);
-  return blob;
-}
-
-async function mediaToMp4(file, kind, mime, onP){
-  const url = URL.createObjectURL(file);
-  const el = document.createElement(kind === 'video' ? 'video' : 'audio');
-  el.src = url; el.playsInline = true; el.preload = 'auto';
-  el.style.cssText = 'position:fixed;left:-9999px;width:2px;height:2px';
-  document.body.appendChild(el);
-  await new Promise((r,j) => { el.onloadedmetadata = r; el.onerror = () => j(new Error('No se puede leer el archivo.')); });
-  const [W,H] = kind === 'video' ? fit(el.videoWidth || 1280, el.videoHeight || 720) : [1280,720];
-  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-  const cx = cv.getContext('2d');
-  const ac = new (window.AudioContext || window.webkitAudioContext)();
-  const src = ac.createMediaElementSource(el);
-  const an = ac.createAnalyser(); an.fftSize = 128;
-  const dest = ac.createMediaStreamDestination();
-  src.connect(an); an.connect(dest);           // sin salida a altavoces: conversión silenciosa
-  const data = new Uint8Array(an.frequencyBinCount);
-  const title = file.name.replace(/\.[^.]+$/,'');
-  let on = true;
-  (function loop(){
-    if(!on) return;
-    if(kind === 'video'){ cx.drawImage(el,0,0,W,H); }
-    else {
-      cx.fillStyle = '#0f1115'; cx.fillRect(0,0,W,H);
-      an.getByteFrequencyData(data);
-      const n = data.length, bw = W/n;
-      for(let i=0;i<n;i++){ const h = data[i]/255*H*0.55; cx.fillStyle = `hsl(${220+i*1.2},80%,65%)`; cx.fillRect(i*bw+2, H*0.75-h, bw-4, h); }
-      cx.fillStyle = '#e8eaf0'; cx.font = '600 44px system-ui,sans-serif'; cx.textAlign = 'center';
-      cx.fillText('♪ ' + title.slice(0,40), W/2, H*0.88);
-    }
-    if(el.duration && isFinite(el.duration)) onP(Math.min(99, el.currentTime/el.duration*100));
-    requestAnimationFrame(loop);
-  })();
-  const stream = new MediaStream([...cv.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
-  const ended = new Promise(r => el.onended = r);
-  await ac.resume();
-  const recP = record(stream, mime, ended);
-  await el.play().catch(() => { throw new Error('El navegador bloqueó la reproducción para convertir.'); });
-  const blob = await recP;
-  on = false; ac.close(); el.remove(); URL.revokeObjectURL(url);
-  return blob;
-}
-
-/* ---------- interfaz ---------- */
-function handle(files){
-  [...files].forEach(f => {
-    const kind = (f.type || '').split('/')[0];
-    if(!['image','video','audio'].includes(kind)) return;
-    list.style.display = 'block';
-    const el = document.createElement('div'); el.className = 'item';
-    const url = URL.createObjectURL(f);
-    const tag = kind==='image' ? `<img src="${url}">` : kind==='video' ? `<video src="${url}" controls playsinline></video>` : `<audio src="${url}" controls></audio>`;
-    el.innerHTML = `<div class="name">${esc(f.name)}</div><div class="meta">${fmt(f.size)} · ${f.type}</div>
-      <div class="prev">${tag}</div><div class="bar"><i></i></div><div class="status meta">Preparando…</div><div class="out"></div>`;
-    list.prepend(el);
-    process(f, kind, el);
-  });
-}
-
-async function process(file, kind, el){
-  const bar = el.querySelector('.bar i'), st = el.querySelector('.status');
-  const fail = m => { st.className = 'status st-err'; st.textContent = '✖ ' + m; };
+async function initFirebase(){
   try{
-    let mp4;
-    const base = file.name.replace(/\.[^.]+$/,'') || 'media';
-    const isMp4 = kind === 'video' && (file.type === 'video/mp4' || /\.mp4$/i.test(file.name));
-    if(isMp4){ mp4 = file; }
-    else {
-      const mime = mp4Mime();
-      if(!mime) return fail('Este navegador no puede crear MP4. Usa Chrome, Edge o Safari.');
-      const onP = p => { bar.style.width = (p*0.5)+'%'; st.textContent = 'Convirtiendo a MP4… ' + Math.round(p) + '%'; };
-      st.textContent = 'Convirtiendo a MP4…';
-      let blob;
-      if(kind === 'image') blob = await imageToMp4(file, mime, Math.min(60, Math.max(1, +$('#dur').value || 5)), onP);
-      else blob = await mediaToMp4(file, kind, mime, onP);
-      mp4 = new File([blob], base.replace(/[^\w\-]+/g,'_') + '.mp4', {type: 'video/mp4'});
-      el.querySelector('.prev').innerHTML = `<video src="${URL.createObjectURL(mp4)}" controls playsinline></video>`;
-    }
-    const link = await send(mp4, p => { bar.style.width = (50 + p/2) + '%'; st.textContent = 'Subiendo… ' + Math.round(p) + '%'; });
-    bar.style.width = '100%'; st.className = 'status st-ok'; st.textContent = '✔ Listo · ' + fmt(mp4.size);
-    const embed = `<video src="${link}" controls></video>`;
-    el.querySelector('.out').innerHTML = `
-      <label>Enlace directo .mp4</label>
-      <div class="row"><input type="text" readonly value="${esc(link)}"><button data-c="${esc(link)}">Copiar</button></div>
-      <label>Código para incrustar</label>
-      <div class="row"><input type="text" readonly value="${esc(embed)}"><button class="sec" data-c="${esc(embed)}">Copiar</button></div>`;
-    el.querySelectorAll('button[data-c]').forEach(b => b.onclick = async () => {
-      try{ await navigator.clipboard.writeText(b.dataset.c); }catch(e){ b.previousElementSibling.select(); document.execCommand('copy'); }
-      const t = b.textContent; b.textContent = '¡Copiado!'; setTimeout(() => b.textContent = t, 1200);
-    });
-  }catch(e){ fail(e.message || 'Error inesperado.'); }
+    const V='10.14.1',B=`https://www.gstatic.com/firebasejs/${V}/`;
+    const [{initializeApp},A,F]=await Promise.all([import(B+'firebase-app.js'),import(B+'firebase-auth.js'),import(B+'firebase-firestore.js')]);
+    const a=initializeApp(firebaseConfig);
+    fb={A,F,auth:A.getAuth(a),db:F.getFirestore(a)};
+    A.onAuthStateChanged(fb.auth,u=>{user=u;renderAuth();if(location.hash.startsWith('#/history'))renderHistory()});
+  }catch(e){console.warn('Firebase no disponible',e);renderAuth()}
+}
+function renderAuth(){
+  const b=$('#authBox');
+  if(user){const n=user.displayName||user.email||'Usuario';b.innerHTML=`<div class="user"><b>${esc(n[0].toUpperCase())}</b><span>${esc(n)}</span><button class="sec sm" data-act="logout">Salir</button></div>`}
+  else b.innerHTML=`<button class="sm" data-act="login">Iniciar sesión</button>`;
+}
+const AERR={'auth/invalid-credential':'Correo o contraseña incorrectos.','auth/invalid-email':'Correo no válido.','auth/email-already-in-use':'Ese correo ya tiene cuenta.','auth/weak-password':'La contraseña debe tener al menos 6 caracteres.','auth/popup-closed-by-user':'Cerraste la ventana de Google.','auth/unauthorized-domain':'Dominio no autorizado: añádelo en Firebase → Authentication → Settings → Authorized domains.','auth/operation-not-allowed':'Ese método no está activado en Firebase → Authentication → Sign-in method.','auth/too-many-requests':'Demasiados intentos. Espera un momento.','auth/network-request-failed':'Sin conexión.','auth/popup-blocked':'El navegador bloqueó la ventana emergente.','auth/operation-not-supported-in-this-environment':'Abre la web desde https:// (no desde un archivo local).','auth/missing-email':'Escribe tu correo.'};
+const aerr=e=>AERR[e.code]||e.message||'Error de autenticación.';
+let authMode='in';
+
+async function saveRecord(rec){
+  const h=ls.get('kl_hist',[]);h.unshift(rec);ls.set('kl_hist',h.slice(0,300));
+  if(user&&fb){try{const c=JSON.parse(JSON.stringify(rec));delete c.dt;await fb.F.setDoc(fb.F.doc(fb.db,'users',user.uid,'links',rec.id),c)}catch(e){toast('Guardado local. No pude sincronizar con la nube (revisa las reglas de Firestore).','err')}}
+}
+let cloudIds=new Set();
+async function loadHistory(){
+  const local=ls.get('kl_hist',[]);let cl=[];
+  if(user&&fb){try{const {F,db}=fb;const q=F.query(F.collection(db,'users',user.uid,'links'),F.orderBy('createdAt','desc'),F.limit(300));cl=(await F.getDocs(q)).docs.map(d=>d.data())}catch(e){toast('No pude leer tu historial en la nube (revisa las reglas de Firestore).','err')}}
+  cloudIds=new Set(cl.map(r=>r.id));
+  const m=new Map();[...cl,...local].forEach(r=>{if(!m.has(r.id))m.set(r.id,r)});
+  return [...m.values()].sort((a,b)=>b.createdAt-a.createdAt);
+}
+async function removeRecord(id){
+  ls.set('kl_hist',ls.get('kl_hist',[]).filter(r=>r.id!==id));
+  if(user&&fb){try{await fb.F.deleteDoc(fb.F.doc(fb.db,'users',user.uid,'links',id))}catch(e){}}
 }
 
-function send(file, onP){
-  return new Promise((res, rej) => {
-    const p = prov.value;
-    if(p === 'local') return res(URL.createObjectURL(file));
-    let endpoint; const fd = new FormData();
-    if(p === 'cloudinary'){
-      const cn = $('#cldName').value.trim(), pr = $('#cldPreset').value.trim();
-      if(!cn || !pr) return rej(new Error('Rellena Cloud name y Upload preset.'));
-      endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cn)}/video/upload`;
-      fd.append('file', file); fd.append('upload_preset', pr);
-    } else {
-      endpoint = 'https://tmpfiles.org/api/v1/upload'; fd.append('file', file);
-    }
-    const x = new XMLHttpRequest();
-    x.open('POST', endpoint);
-    x.upload.onprogress = e => e.lengthComputable && onP(e.loaded/e.total*100);
-    x.onerror = () => rej(new Error('Error de red o el servicio bloqueó la petición. Prueba otro servicio.'));
-    x.onload = () => {
-      try{
-        const r = JSON.parse(x.responseText);
-        if(p === 'cloudinary'){
-          if(r.secure_url) return res(r.secure_url.replace(/\.[a-z0-9]+$/i,'.mp4'));
-          return rej(new Error(r.error?.message || 'Cloudinary rechazó el archivo.'));
-        }
-        if(r.status === 'success' && r.data?.url) return res(r.data.url.replace(/^http:/,'https:').replace('tmpfiles.org/','tmpfiles.org/dl/'));
-        rej(new Error('Respuesta inesperada del servicio.'));
-      }catch(e){ rej(new Error('No se pudo leer la respuesta (HTTP ' + x.status + ').')); }
-    };
+/* ============ Cloudinary ============ */
+const endpoint=()=>`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloud)}/auto/upload`;
+function xhrSend(fd,headers,onLoaded){
+  return new Promise((res,rej)=>{
+    const x=new XMLHttpRequest();x.open('POST',endpoint());
+    for(const k in headers)x.setRequestHeader(k,headers[k]);
+    x.upload.onprogress=e=>e.lengthComputable&&onLoaded&&onLoaded(e.loaded);
+    x.onerror=()=>rej(new Error('Error de red o bloqueo del servicio.'));
+    x.onload=()=>{let j=null;try{j=JSON.parse(x.responseText)}catch(e){}
+      if(x.status>=200&&x.status<300&&j)res(j);else rej(new Error(j?.error?.message||('Cloudinary respondió HTTP '+x.status)))};
     x.send(fd);
   });
 }
+async function cldUpload(src,onP){
+  const base=()=>{const fd=new FormData();fd.append('upload_preset',cfg.preset);fd.append('tags','kendylink');return fd};
+  if(typeof src==='string'){const fd=base();fd.append('file',src);onP(30);const r=await xhrSend(fd,{});onP(100);return r}
+  const CH=6*1024*1024;
+  if(src.size<=20*1024*1024){const fd=base();fd.append('file',src);return xhrSend(fd,{},l=>onP(l/src.size*100))}
+  const id=Date.now()+'-'+Math.random().toString(36).slice(2);let last;
+  for(let s=0;s<src.size;s+=CH){
+    const e=Math.min(s+CH,src.size)-1,fd=base();fd.append('file',src.slice(s,e+1),src.name);
+    last=await xhrSend(fd,{'X-Unique-Upload-Id':id,'Content-Range':`bytes ${s}-${e}/${src.size}`},l=>onP((s+l)/src.size*100));
+  }
+  return last;
+}
+
+/* ============ generador de enlaces ============ */
+const kindOf=rec=>{const r=rec.res;if(r.resource_type==='image')return'image';if(r.resource_type==='raw')return'raw';return(r.is_audio||(r.audio&&!r.video)||(!rec.tc&&rec.tool==='audio'))?'audio':'video'};
+function linkSet(rec){
+  const r=rec.res,cloud=rec.cloud,o=rec.opts||{},kind=kindOf(rec);
+  const base=`https://res.cloudinary.com/${cloud}/${r.resource_type}/upload`;
+  const mk=(tr,ext)=>`${base}/${tr?tr+'/':''}v${r.version}/${r.public_id}${ext?'.'+ext:''}`;
+  const name=(rec.name||'archivo').replace(/\.[^.]+$/,'');
+  const orig=r.secure_url;
+  let main,thumb='',direct=[],embed=[],apps=[];
+  const J=(o)=>JSON.stringify(o,null,2);
+  if(kind==='video'){
+    const vw=o.w?`,c_limit,w_${o.w}`:'';
+    const mp4=mk('vc_h264,ac_aac,q_auto'+vw,'mp4'),webm=mk('q_auto'+vw,'webm'),hls=mk('sp_auto','m3u8'),dash=mk('sp_auto','mpd');
+    const gif=mk('du_8,w_480,fps_10','gif'),mp3=mk('','mp3');thumb=mk('so_0,w_1280','jpg');
+    main=(r.format==='mp4'&&!rec.tc&&!o.w)?orig:mp4;
+    if(rec.focus==='gif')main=gif;if(rec.focus==='mp3')main=mp3;
+    if(rec.focus==='opt')main=mk('q_auto,vc_h264,ac_aac,c_limit,w_'+(o.w||1280),'mp4');
+    direct=[['MP4 H.264/AAC (compatible con todo)',mp4],['Original (.'+r.format+')',orig],['WebM (VP9)',webm],['Streaming HLS (.m3u8)',hls],['Streaming DASH (.mpd)',dash],['GIF animado (máx. 8 s)',gif],['Miniatura JPG',thumb],['Solo audio MP3',mp3],['Descarga forzada',mk('fl_attachment','mp4')]];
+    embed=[['HTML <video>',`<video src="${main}" poster="${thumb}" controls playsinline preload="metadata"></video>`],
+      ['HTML multiformato',`<video controls playsinline poster="${thumb}">\n  <source src="${mp4}" type="video/mp4">\n  <source src="${webm}" type="video/webm">\n</video>`],
+      ['iframe (Cloudinary Player)',`<iframe src="https://player.cloudinary.com/embed/?cloud_name=${cloud}&public_id=${encodeURIComponent(r.public_id)}" width="640" height="360" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen frameborder="0"></iframe>`],
+      ['Enlace HTML',`<a href="${main}">Ver vídeo</a>`],['Markdown',`[Ver vídeo](${main})`],['Markdown con miniatura',`[![${name}](${thumb})](${main})`],['BBCode',`[url=${main}]Ver vídeo[/url]`],
+      ['Open Graph',`<meta property="og:type" content="video.other">\n<meta property="og:video" content="${main}">\n<meta property="og:video:type" content="video/mp4">\n<meta property="og:image" content="${thumb}">`],
+      ['JSON',J({url:main,webm,hls,dash,gif,thumbnail:thumb,audio:mp3})],['cURL',`curl -L -o "${name}.mp4" "${main}"`]];
+    apps=[['Flutter (video_player)',`VideoPlayerController.networkUrl(Uri.parse('${main}'))`],['Android (ExoPlayer)',`player.setMediaItem(MediaItem.fromUri("${main}"))`],['Swift (AVPlayer)',`let player = AVPlayer(url: URL(string: "${main}")!)`],['Unity',`videoPlayer.url = "${main}";`],['Python',`import urllib.request\nurllib.request.urlretrieve("${main}", "${name}.mp4")`]];
+  }else if(kind==='image'){
+    const w=o.w?`c_limit,w_${o.w}`:'';main=orig;
+    if(o.w||(o.fmt&&o.fmt!=='original')){const f=o.fmt==='auto'?'':(o.fmt&&o.fmt!=='original'?o.fmt:r.format);main=mk([w,'q_auto',o.fmt==='auto'?'f_auto':''].filter(Boolean).join(','),f)}
+    thumb=mk('c_fill,w_300,h_300,g_auto','jpg');
+    const webp=mk('q_auto','webp'),avif=mk('q_auto','avif'),jpg=mk('q_auto','jpg');
+    direct=[['Original (.'+r.format+')',orig],['Auto formato (f_auto,q_auto)',mk('f_auto,q_auto','')],['WebP',webp],['AVIF',avif],['JPG',jpg],['PNG',mk('','png')],['Ancho 800 px',mk('c_limit,w_800,q_auto','jpg')],['Miniatura cuadrada 300×300',thumb],['Avatar redondo 256',mk('c_fill,w_256,h_256,g_face,r_max','png')],['Placeholder borroso',mk('e_blur:1000,w_40,q_auto','jpg')],['Descarga forzada',mk('fl_attachment','')]];
+    embed=[['HTML <img>',`<img src="${main}" alt="${esc(name)}" loading="lazy">`],['HTML <picture>',`<picture>\n  <source srcset="${avif}" type="image/avif">\n  <source srcset="${webp}" type="image/webp">\n  <img src="${jpg}" alt="${esc(name)}" loading="lazy">\n</picture>`],['CSS background',`background-image: url("${main}");`],['Markdown',`![${name}](${main})`],['BBCode',`[img]${main}[/img]`],['Open Graph',`<meta property="og:image" content="${main}">\n<meta name="twitter:image" content="${main}">`],['JSON',J({url:main,webp,avif,jpg,thumbnail:thumb})],['cURL',`curl -L -o "${name}.${r.format}" "${main}"`]];
+    apps=[['Flutter',`Image.network('${main}')`],['Android (Glide)',`Glide.with(context).load("${main}").into(imageView)`],['Swift (SwiftUI)',`AsyncImage(url: URL(string: "${main}"))`],['Python',`import urllib.request\nurllib.request.urlretrieve("${main}", "${name}.${r.format}")`]];
+  }else if(kind==='audio'){
+    const mp3=mk('','mp3'),ogg=mk('','ogg');main=mp3;
+    direct=[['MP3',mp3],['M4A (AAC)',mk('','m4a')],['OGG',ogg],['WAV',mk('','wav')],['MP4 (solo audio)',mk('ac_aac','mp4')],['Original (.'+r.format+')',orig],['Descarga forzada',mk('fl_attachment','mp3')]];
+    embed=[['HTML <audio>',`<audio src="${main}" controls preload="none"></audio>`],['HTML multiformato',`<audio controls preload="none">\n  <source src="${mp3}" type="audio/mpeg">\n  <source src="${ogg}" type="audio/ogg">\n</audio>`],['Enlace HTML',`<a href="${main}">Escuchar</a>`],['Markdown',`[Escuchar](${main})`],['BBCode',`[audio]${main}[/audio]`],['JSON',J({url:main,ogg})],['cURL',`curl -L -o "${name}.mp3" "${main}"`]];
+    apps=[['Flutter (just_audio)',`await player.setUrl('${main}');`],['Android (ExoPlayer)',`player.setMediaItem(MediaItem.fromUri("${main}"))`],['Swift (AVPlayer)',`let player = AVPlayer(url: URL(string: "${main}")!)`],['Python',`import urllib.request\nurllib.request.urlretrieve("${main}", "${name}.mp3")`]];
+  }else{
+    main=orig;const dl=`${base}/fl_attachment/v${r.version}/${r.public_id}`;
+    direct=[['Enlace directo',orig],['Descarga forzada',dl]];
+    embed=[['Enlace HTML',`<a href="${orig}" download>Descargar ${esc(name)}</a>`],['iframe (PDF/documento)',`<iframe src="${orig}" width="100%" height="600"></iframe>`],['Visor de Google Docs',`https://docs.google.com/viewer?url=${encodeURIComponent(orig)}&embedded=true`],['Markdown',`[${name}](${orig})`],['BBCode',`[url=${orig}]${name}[/url]`],['JSON',J({url:orig,download:dl})],['cURL',`curl -L -O "${orig}"`]];
+    apps=[['Python',`import urllib.request\nurllib.request.urlretrieve("${orig}", "${name}")`]];
+  }
+  const u=encodeURIComponent(main),tx=encodeURIComponent(name);
+  const share=[['WhatsApp',`https://wa.me/?text=${tx}%20${u}`],['Telegram',`https://t.me/share/url?url=${u}&text=${tx}`],['X',`https://twitter.com/intent/tweet?url=${u}&text=${tx}`],['Facebook',`https://www.facebook.com/sharer/sharer.php?u=${u}`],['Reddit',`https://www.reddit.com/submit?url=${u}&title=${tx}`],['LinkedIn',`https://www.linkedin.com/sharing/share-offsite/?url=${u}`],['Email',`mailto:?subject=${tx}&body=${u}`]];
+  const qr=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${u}`;
+  const groups=[{icon:'🔗',title:'Enlaces directos',items:direct,open:true},{icon:'🧩',title:'Incrustar en una web',items:embed},{icon:'📱',title:'Código para apps',items:apps}];
+  return {kind,main,thumb,groups,share,qr,direct,embed,apps};
+}
+const isUrl=v=>/^https?:\/\//.test(v);
+function rowHtml([label,val]){
+  const multi=val.includes('\n');
+  const f=multi?`<textarea readonly rows="${Math.min(6,val.split('\n').length+1)}">${esc(val)}</textarea>`:`<input readonly value="${esc(val)}" onfocus="this.select()">`;
+  return `<label>${esc(label)}</label><div class="row">${f}<button class="sec sm" data-act="copy">Copiar</button>${isUrl(val)?`<a class="btn sec sm" target="_blank" rel="noopener" href="${esc(val)}">↗</a>`:''}</div>`;
+}
+function renderResult(rec,el){
+  RECS.set(rec.id,rec);
+  const L=linkSet(rec),r=rec.res;
+  const prev=L.kind==='video'?`<video src="${esc(r.secure_url)}" controls playsinline preload="metadata"></video>`:L.kind==='image'?`<img src="${esc(L.main)}" alt="">`:L.kind==='audio'?`<audio src="${esc(r.secure_url)}" controls preload="none"></audio>`:`<div style="font-size:3rem">📄</div>`;
+  const canDel=rec.dt&&Date.now()-rec.createdAt<9*60e3;
+  el.innerHTML=`<div class="prev">${prev}</div>
+    <div class="main"><label>Enlace principal</label><div class="row"><input readonly value="${esc(L.main)}" onfocus="this.select()"><button data-act="copy">Copiar</button><a class="btn sec" target="_blank" rel="noopener" href="${esc(L.main)}">Abrir</a></div></div>
+    <p class="note" style="margin:0">${L.kind==='video'||L.kind==='audio'?'La primera vez que abras una versión convertida puede tardar unos segundos en procesarse. ':''}${rec.bytes?fmtB(rec.bytes)+' · ':''}${new Date(rec.createdAt).toLocaleString('es')}</p>
+    <div class="acts"><button class="sec sm" data-act="copyall" data-id="${rec.id}">📋 Copiar todos los enlaces</button>${navigator.share?`<button class="sec sm" data-act="nshare" data-id="${rec.id}">📤 Compartir…</button>`:''}${canDel?`<button class="sec sm" data-act="deltoken" data-id="${rec.id}">🗑️ Borrar de Cloudinary</button>`:''}</div>
+    ${L.groups.filter(g=>g.items.length).map(g=>`<details class="grp" ${g.open?'open':''}><summary>${g.icon} ${g.title}</summary><div class="in">${g.items.map(rowHtml).join('')}</div></details>`).join('')}
+    <details class="grp"><summary>📣 Compartir en redes</summary><div class="in"><div class="share">${L.share.map(([n,u])=>`<a class="btn sec sm" target="_blank" rel="noopener" href="${esc(u)}">${n}</a>`).join('')}</div></div></details>
+    <details class="grp"><summary>🔳 Código QR</summary><div class="in qr"><img src="${esc(L.qr)}" alt="QR" loading="lazy"><div><p class="note" style="margin:0 0 8px">Escanéalo para abrir el enlace principal.</p><a class="btn sec sm" target="_blank" rel="noopener" href="${esc(L.qr)}">Abrir / guardar QR</a></div></div></details>`;
+}
+
+/* ============ conversión a MP4 en el navegador ============ */
+const MIMES=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'];
+const mp4Mime=()=>window.MediaRecorder?MIMES.find(m=>MediaRecorder.isTypeSupported(m)):null;
+const even=n=>Math.max(2,Math.round(n/2)*2);
+const fit=(w,h)=>{const s=Math.min(1,1280/Math.max(w,h));return[even(w*s),even(h*s)]};
+function record(stream,mime,stopP){
+  return new Promise((res,rej)=>{
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:4e6,audioBitsPerSecond:128e3});const ch=[];
+    rec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+    rec.onerror=e=>rej(e.error||new Error('Error al grabar el MP4'));
+    rec.onstop=()=>res(new Blob(ch,{type:'video/mp4'}));
+    rec.start(500);
+    stopP.then(()=>new Promise(r=>setTimeout(r,300))).then(()=>rec.state!=='inactive'&&rec.stop(),rej);
+  });
+}
+async function imageToMp4(file,mime,secs,onP){
+  const url=URL.createObjectURL(file),img=new Image();img.src=url;
+  await img.decode().catch(()=>{throw new Error('No se puede leer la imagen (¿formato HEIC?).')});
+  const [W,H]=fit(img.naturalWidth,img.naturalHeight),cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const cx=cv.getContext('2d'),t0=performance.now();let on=true;
+  (function loop(){if(!on)return;cx.drawImage(img,0,0,W,H);onP(Math.min(99,(performance.now()-t0)/(secs*10)));requestAnimationFrame(loop)})();
+  const blob=await record(cv.captureStream(30),mime,new Promise(r=>setTimeout(r,secs*1000)));
+  on=false;URL.revokeObjectURL(url);return blob;
+}
+async function audioToMp4(file,mime,onP){
+  const url=URL.createObjectURL(file),el=document.createElement('audio');
+  el.src=url;el.preload='auto';el.style.cssText='position:fixed;left:-9999px';document.body.appendChild(el);
+  await new Promise((r,j)=>{el.onloadedmetadata=r;el.onerror=()=>j(new Error('No se puede leer el audio.'))});
+  const W=1280,H=720,cv=document.createElement('canvas');cv.width=W;cv.height=H;const cx=cv.getContext('2d');
+  const ac=new(window.AudioContext||window.webkitAudioContext)(),src=ac.createMediaElementSource(el),an=ac.createAnalyser();an.fftSize=128;
+  const dest=ac.createMediaStreamDestination();src.connect(an);an.connect(dest);
+  const data=new Uint8Array(an.frequencyBinCount),title=file.name.replace(/\.[^.]+$/,'');let on=true;
+  (function loop(){if(!on)return;
+    cx.fillStyle='#0f1115';cx.fillRect(0,0,W,H);an.getByteFrequencyData(data);
+    const n=data.length,bw=W/n;for(let i=0;i<n;i++){const h=data[i]/255*H*.55;cx.fillStyle=`hsl(${220+i*1.2},80%,65%)`;cx.fillRect(i*bw+2,H*.75-h,bw-4,h)}
+    cx.fillStyle='#eceef4';cx.font='600 44px system-ui,sans-serif';cx.textAlign='center';cx.fillText('♪ '+title.slice(0,40),W/2,H*.88);
+    if(isFinite(el.duration))onP(Math.min(99,el.currentTime/el.duration*100));requestAnimationFrame(loop)})();
+  const stream=new MediaStream([...cv.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]);
+  const ended=new Promise(r=>el.onended=r);await ac.resume();
+  const rp=record(stream,mime,ended);
+  await el.play().catch(()=>{throw new Error('El navegador bloqueó la reproducción necesaria para convertir.')});
+  const blob=await rp;on=false;ac.close();el.remove();URL.revokeObjectURL(url);return blob;
+}
+
+/* ============ vistas ============ */
+function route(){
+  const h=location.hash.replace(/^#\/?/,''),[p]=h.split('/');currentTool=null;
+  if(p==='history')renderHistory();
+  else{const t=TOOLS.find(x=>x.id===p);t?renderTool(t):renderHome()}
+  if(!location.hash.includes('tools'))window.scrollTo(0,0);
+}
+function renderHome(){
+  app.innerHTML=`
+  <section class="hero"><div class="wrap">
+    <h1>Convierte tus fotos, vídeos y música en <em>enlaces directos</em></h1>
+    <p>Sube un archivo y obtén al instante un enlace MP4, MP3, JPG, GIF o de streaming, listo para usar en cualquier web o app. Sin registro, rápido y gratis.</p>
+    <div class="cta"><button data-act="scroll">Empezar ahora ↓</button><a class="btn sec" href="#/history">Mi historial</a></div>
+    <div class="chips"><span class="chip ok">✔ Sin registro</span><span class="chip">☁️ Alojado en Cloudinary</span><span class="chip">🔐 Cuenta opcional</span><span class="chip">📦 Archivos grandes</span><span class="chip">📱 Funciona en el móvil</span></div>
+  </div></section>
+  <section class="blk"><div class="wrap">
+    <h2>¿Cómo funciona?</h2><p>Tres pasos y tienes tu enlace.</p>
+    <div class="steps">
+      <div class="step"><b class="n">1</b><br><b>Elige qué quieres hacer</b><div class="note">Vídeo, foto, música, GIF, QR… abajo tienes todas las opciones.</div></div>
+      <div class="step"><b class="n">2</b><br><b>Sube tu archivo</b><div class="note">Arrástralo, elígelo o pégalo con Ctrl+V. También por URL.</div></div>
+      <div class="step"><b class="n">3</b><br><b>Copia el enlace</b><div class="note">Con más de 30 formatos: directo, iframe, Markdown, apps y redes.</div></div>
+    </div>
+  </div></section>
+  <section class="blk" id="tools"><div class="wrap">
+    <h2>¿Qué quieres hacer?</h2><p>Elige una herramienta para empezar.</p>
+    <div class="grid">${TOOLS.map(t=>`<a class="tcard" href="#/${t.id}"><span class="ti">${t.icon}</span><b>${t.title}</b><span class="d">${t.desc}</span></a>`).join('')}
+      <a class="tcard" href="#/history"><span class="ti">🗂️</span><b>Mi historial</b><span class="d">Todos tus enlaces guardados, buscables y exportables</span></a></div>
+  </div></section>
+  <section class="blk"><div class="wrap">
+    <h2>Todos los tipos de enlace</h2><p>Cada archivo genera muchas variantes listas para copiar.</p>
+    <div class="types">${LINKTYPES.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+  </div></section>
+  <footer><div class="wrap">KendyLink · Hecho con Cloudinary y Firebase<br>Los enlaces son públicos: cualquiera que los tenga puede verlos.</div></footer>`;
+}
+
+function optsHtml(t){
+  const o=t.opts||[];if(!o.length)return'';
+  return `<div class="card"><div class="opts">
+    ${o.includes('w')?`<div><label>Ancho máximo (px)</label><input type="number" id="o-w" min="64" max="4096" placeholder="Original"></div>`:''}
+    ${o.includes('fmt')?`<div><label>Formato del enlace principal</label><select id="o-fmt"><option value="original">Original</option><option value="auto">Automático (el mejor)</option><option value="jpg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option><option value="avif">AVIF</option></select></div>`:''}
+    ${o.includes('dur')?`<div><label>Duración del vídeo (segundos)</label><input type="number" id="o-dur" min="1" max="60" value="5"></div>`:''}
+  </div></div>`;
+}
+function renderTool(t){
+  currentTool=t;
+  let body='';
+  if(t.type==='upload'||t.type==='convert'){
+    body=optsHtml(t)+`<div class="drop" tabindex="0"><div class="big">${t.icon}</div><b>Arrastra aquí o toca para elegir</b><span>${esc(t.hint||'')} · también puedes pegar con Ctrl+V</span><input type="file" hidden multiple accept="${esc(t.accept)}"></div>`;
+  }else if(t.type==='url'){
+    body=`<div class="card"><label style="margin-top:0">Pega el enlace público de un archivo (imagen, vídeo, audio, PDF…)</label><div class="row"><input id="urlIn" type="url" placeholder="https://ejemplo.com/video.mp4"><button data-act="fetchurl">Crear enlace</button></div><p class="note">Cloudinary descargará el archivo y lo alojará en tu cuenta. Debe ser un enlace directo al archivo (no sirven páginas como YouTube).</p></div>`;
+  }else if(t.type==='qr'){
+    body=`<div class="card"><label style="margin-top:0">Enlace o texto</label><input id="qrIn" placeholder="https://… o cualquier texto"><label>Tamaño</label><select id="qrSz"><option value="250">Pequeño</option><option value="400" selected>Mediano</option><option value="700">Grande</option></select><div id="qrOut" class="qr" style="margin-top:14px"></div></div>`;
+  }
+  app.innerHTML=`<div class="wrap tool"><button class="back" data-act="home">← Volver al inicio</button><h2>${t.icon} ${t.title}</h2><p>${t.desc}</p>${body}<div id="results"></div></div>`;
+  const root=$('.tool');
+  if($('.drop',root)){
+    const drop=$('.drop',root),inp=$('input[type=file]',root);
+    drop.onclick=()=>inp.click();drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')inp.click()};
+    ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+    ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+    drop.addEventListener('drop',e=>handleFiles(t,e.dataTransfer.files));
+    inp.onchange=()=>{handleFiles(t,inp.files);inp.value=''};
+  }
+  if(t.type==='qr'){
+    const gen=()=>{const v=$('#qrIn').value.trim(),s=$('#qrSz').value;if(!v){$('#qrOut').innerHTML='';return}
+      const u=`https://api.qrserver.com/v1/create-qr-code/?size=${s}x${s}&margin=10&data=${encodeURIComponent(v)}`;
+      $('#qrOut').innerHTML=`<img src="${esc(u)}" alt="QR" style="width:200px;height:200px"><div><a class="btn sm" target="_blank" rel="noopener" href="${esc(u)}">Abrir / guardar QR</a></div>`};
+    $('#qrIn').oninput=gen;$('#qrSz').onchange=gen;
+  }
+}
+const okType=(t,f)=>{if(!t.accept||t.accept==='*/*'||!f.type)return true;return t.accept.split(',').some(p=>p.endsWith('/*')?f.type.startsWith(p.slice(0,-1)):f.type===p)};
+function handleFiles(t,files){
+  const box=$('#results');[...files].forEach(f=>{if(!okType(t,f))return toast(`«${f.name}» no es un archivo válido para esta herramienta.`,'err');processFile(t,f,box)});
+}
+const readOpts=()=>({w:+($('#o-w')?.value)||0,fmt:$('#o-fmt')?.value||'',dur:Math.min(60,Math.max(1,+($('#o-dur')?.value)||5))});
+const mkRec=(t,name,res,opts,tc)=>{
+  const pick={public_id:res.public_id,version:res.version,resource_type:res.resource_type,format:res.format,secure_url:res.secure_url,width:res.width,height:res.height,duration:res.duration,is_audio:!!res.is_audio,audio:!!res.audio,video:!!res.video};
+  const clean={};Object.keys(pick).forEach(k=>{if(pick[k]!==undefined)clean[k]=pick[k]});
+  return {id:'k'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,tool:t.id,focus:t.focus||'',tc:!!tc,createdAt:Date.now(),bytes:res.bytes||0,cloud:cfg.cloud,opts:{w:opts.w||0,fmt:opts.fmt||''},dt:res.delete_token||'',res:clean};
+};
+function newItem(name,meta){
+  const item=document.createElement('div');item.className='card';
+  item.innerHTML=`<div class="name">${esc(name)}</div><div class="meta">${esc(meta)}</div><div class="bar"><i></i></div><div class="status meta">En cola…</div><div class="out"></div>`;
+  $('#results').prepend(item);
+  const bar=$('.bar i',item),st=$('.status',item);
+  return {item,setP:(p,txt)=>{bar.style.width=Math.min(100,p)+'%';st.className='status meta';st.textContent=txt},
+    ok:()=>{bar.style.width='100%';st.className='status st-ok';st.textContent='✔ Listo'},
+    fail:m=>{st.className='status st-err';st.textContent='✖ '+m},out:$('.out',item)};
+}
+async function processFile(t,file,box){
+  const ui=newItem(file.name,fmtB(file.size)+(file.type?' · '+file.type:'')),opts=readOpts();
+  try{
+    let up=file,tc=false,off=0,sc=1;
+    if(t.type==='convert'){
+      const mime=mp4Mime();if(!mime)throw new Error('Este navegador no puede crear MP4. Usa Chrome, Edge o Safari.');
+      const onP=p=>ui.setP(p/2,'Convirtiendo a MP4… '+Math.round(p)+'%');ui.setP(0,'Convirtiendo a MP4…');
+      const blob=t.id==='img2mp4'?await imageToMp4(file,mime,opts.dur,onP):await audioToMp4(file,mime,onP);
+      const base=(file.name.replace(/\.[^.]+$/,'')||'media').replace(/[^\w\-]+/g,'_');
+      up=new File([blob],base+'.mp4',{type:'video/mp4'});tc=true;off=50;sc=.5;
+    }
+    ui.setP(off,'Subiendo…');
+    const res=await cldUpload(up,p=>ui.setP(off+p*sc,'Subiendo… '+Math.round(p)+'%'));
+    const rec=mkRec(t,file.name,res,opts,tc);await saveRecord(rec);ui.ok();renderResult(rec,ui.out);
+  }catch(e){ui.fail(e.message||String(e))}
+}
+async function processUrl(t,url){
+  if(!/^https?:\/\//i.test(url))return toast('Escribe una URL que empiece por http:// o https://','err');
+  const ui=newItem(url,'Desde URL'),opts={};
+  try{ui.setP(10,'Cloudinary está descargando el archivo…');const res=await cldUpload(url,p=>ui.setP(p,'Procesando…'));
+    const name=decodeURIComponent((url.split('?')[0].split('/').pop())||'archivo');
+    const rec=mkRec(t,name,res,opts,false);await saveRecord(rec);ui.ok();renderResult(rec,ui.out)}
+  catch(e){ui.fail(e.message||String(e))}
+}
+
+/* ============ historial ============ */
+async function renderHistory(){
+  app.innerHTML=`<div class="wrap tool"><button class="back" data-act="home">← Volver al inicio</button><h2>🗂️ Mi historial</h2><p>Todos los enlaces que has creado.</p><div id="hbody"><p class="note">Cargando…</p></div></div>`;
+  const recs=await loadHistory();if(!$('#hbody'))return;
+  $('#hbody').innerHTML=`${user?`<div class="banner">☁️ Sesión iniciada: tu historial se guarda también en tu cuenta.</div>`:`<div class="banner">💡 Ahora mismo se guarda solo en este navegador. <a href="#" data-act="login">Inicia sesión</a> (opcional) para tenerlo en la nube.</div>`}
+  <div class="filters"><input id="hq" placeholder="Buscar…"><select id="hk"><option value="">Todos</option><option value="video">Vídeos</option><option value="image">Fotos</option><option value="audio">Audio</option><option value="raw">Archivos</option></select><button class="sec sm" data-act="exjson">JSON</button><button class="sec sm" data-act="excsv">CSV</button><button class="sec sm" data-act="clearlocal">Borrar local</button></div>
+  <div id="hlist"></div>`;
+  const draw=()=>{
+    const q=$('#hq').value.toLowerCase(),k=$('#hk').value;
+    const list=recs.filter(r=>(!k||kindOf(r)===k)&&(!q||(r.name||'').toLowerCase().includes(q)));
+    $('#hlist').innerHTML=list.length?list.map(r=>{RECS.set(r.id,r);const L=linkSet(r);
+      const th=L.thumb&&L.kind!=='raw'?`<img loading="lazy" src="${esc(L.kind==='image'?L.thumb:r.res.resource_type==='video'?`https://res.cloudinary.com/${r.cloud}/video/upload/so_0,c_fill,w_112,h_112/v${r.res.version}/${r.res.public_id}.jpg`:L.thumb)}" alt="">`:({audio:'🎵',raw:'📄',video:'🎬',image:'🖼️'}[L.kind]);
+      return `<div class="hitem" data-id="${r.id}"><div class="hthumb">${th}</div><div class="hinfo"><div class="name">${esc(r.name||'archivo')}</div><div class="meta">${new Date(r.createdAt).toLocaleString('es')}${r.bytes?' · '+fmtB(r.bytes):''}<span class="badge">${L.kind}</span>${cloudIds.has(r.id)?'<span class="badge">☁️</span>':''}</div></div>
+      <div class="hbtn"><button class="sm" data-act="hcopy" data-id="${r.id}">Copiar</button><button class="sec sm" data-act="hdet" data-id="${r.id}">Detalles</button><button class="ghost sm" data-act="hdel" data-id="${r.id}">✕</button></div></div><div class="hdet" id="det-${r.id}" hidden></div>`}).join(''):`<p class="note">No hay resultados. ¡Crea tu primer enlace desde el inicio!</p>`;
+  };
+  $('#hq').oninput=draw;$('#hk').onchange=draw;draw();window._recs=recs;
+}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+/* ============ eventos globales ============ */
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  if(a==='copy'){e.preventDefault();const f=b.closest('.row').querySelector('input,textarea');copyText(f.value)}
+  else if(a==='theme'){const n=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=n;ls.set('kl_theme',n)}
+  else if(a==='home'){location.hash='#/'}
+  else if(a==='scroll'){$('#tools').scrollIntoView({behavior:'smooth'})}
+  else if(a==='settings'){$('#sCloud').value=cfg.cloud;$('#sPreset').value=cfg.preset;$('#setDlg').showModal()}
+  else if(a==='savecfg'){cfg.cloud=$('#sCloud').value.trim()||DEFAULTS.cloud;cfg.preset=$('#sPreset').value.trim()||DEFAULTS.preset;ls.set('kl_cfg',{cloud:cfg.cloud,preset:cfg.preset});$('#setDlg').close();toast('Ajustes guardados','ok')}
+  else if(a==='resetcfg'){Object.assign(cfg,DEFAULTS);ls.set('kl_cfg',{});$('#sCloud').value=cfg.cloud;$('#sPreset').value=cfg.preset;toast('Valores restablecidos','ok')}
+  else if(a==='close'){b.closest('dialog').close()}
+  else if(a==='login'){e.preventDefault();if(!fb)return toast('Firebase no se pudo cargar. Revisa tu conexión.','err');$('#aErr').textContent='';$('#authDlg').showModal()}
+  else if(a==='logout'){try{await fb.A.signOut(fb.auth);toast('Sesión cerrada','ok')}catch(er){toast(aerr(er),'err')}}
+  else if(a==='authmode'){authMode=b.dataset.m;$('#tabIn').className=authMode==='in'?'sec':'ghost';$('#tabUp').className=authMode==='up'?'sec':'ghost';$('#aGo').textContent=authMode==='in'?'Entrar':'Crear cuenta';$('#aPass').autocomplete=authMode==='in'?'current-password':'new-password'}
+  else if(a==='google'){try{await fb.A.signInWithPopup(fb.auth,new fb.A.GoogleAuthProvider());$('#authDlg').close();toast('¡Bienvenido!','ok')}catch(er){$('#aErr').textContent=aerr(er)}}
+  else if(a==='reset'){e.preventDefault();const m=$('#aMail').value.trim();if(!m){$('#aErr').textContent='Escribe tu correo arriba y vuelve a pulsar.';return}
+    try{await fb.A.sendPasswordResetEmail(fb.auth,m);$('#aErr').style.color='var(--ok)';$('#aErr').textContent='Te enviamos un correo para restablecerla.'}catch(er){$('#aErr').style.color='var(--err)';$('#aErr').textContent=aerr(er)}}
+  else if(a==='fetchurl'){processUrl(currentTool,$('#urlIn').value.trim())}
+  else if(a==='copyall'){const L=linkSet(RECS.get(id));const all=[['Principal',L.main],...L.direct].map(([n,u])=>`${n}: ${u}`).join('\n');copyText(all)}
+  else if(a==='nshare'){const L=linkSet(RECS.get(id));try{await navigator.share({title:RECS.get(id).name,url:L.main})}catch(er){}}
+  else if(a==='deltoken'){const rec=RECS.get(id);if(!confirm('¿Borrar este archivo de Cloudinary? El enlace dejará de funcionar.'))return;
+    try{const fd=new FormData();fd.append('token',rec.dt);const j=await(await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(rec.cloud)}/delete_by_token`,{method:'POST',body:fd})).json();
+      if(j.result==='ok'){await removeRecord(id);b.closest('.card').querySelector('.out').innerHTML='<p class="note">Archivo borrado.</p>';toast('Borrado ✔','ok')}else toast('No se pudo borrar (el token dura 10 min).','err')}catch(er){toast('No se pudo borrar.','err')}}
+  else if(a==='hcopy'){copyText(linkSet(RECS.get(id)).main)}
+  else if(a==='hdet'){const d=$('#det-'+id);if(d.hidden){renderResult(RECS.get(id),d);d.hidden=false}else d.hidden=true}
+  else if(a==='hdel'){if(!confirm('¿Quitar del historial? (el archivo sigue existiendo en Cloudinary)'))return;await removeRecord(id);window._recs=window._recs.filter(r=>r.id!==id);const it=b.closest('.hitem');$('#det-'+id)?.remove();it.remove()}
+  else if(a==='exjson'){download('kendylink-historial.json',JSON.stringify(window._recs.map(r=>({name:r.name,kind:kindOf(r),url:linkSet(r).main,date:new Date(r.createdAt).toISOString()})),null,2),'application/json')}
+  else if(a==='excsv'){const q=s=>'"'+String(s).replace(/"/g,'""')+'"';download('kendylink-historial.csv','nombre,tipo,url,fecha\n'+window._recs.map(r=>[q(r.name),kindOf(r),q(linkSet(r).main),new Date(r.createdAt).toISOString()].join(',')).join('\n'),'text/csv')}
+  else if(a==='clearlocal'){if(confirm('¿Borrar el historial guardado en este navegador?')){ls.set('kl_hist',[]);renderHistory()}}
+});
+$('#authForm').addEventListener('submit',async e=>{
+  e.preventDefault();const m=$('#aMail').value.trim(),p=$('#aPass').value,er=$('#aErr');er.style.color='var(--err)';er.textContent='';
+  if(!fb){er.textContent='Firebase no se pudo cargar.';return}
+  try{authMode==='in'?await fb.A.signInWithEmailAndPassword(fb.auth,m,p):await fb.A.createUserWithEmailAndPassword(fb.auth,m,p);$('#authDlg').close();toast('¡Listo!','ok');e.target.reset()}
+  catch(x){er.textContent=aerr(x)}
+});
+document.addEventListener('paste',e=>{
+  if(!currentTool||!['upload','convert'].includes(currentTool.type))return;
+  const fs=[...(e.clipboardData?.files||[])];if(fs.length){e.preventDefault();handleFiles(currentTool,fs)}
+});
+window.addEventListener('hashchange',route);
+renderAuth();route();initFirebase();
 </script>
 </body>
 </html>
