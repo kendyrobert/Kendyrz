@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Media a Enlace</title>
+<title>Media a MP4</title>
 <style>
   :root{--bg:#0f1115;--card:#171a21;--line:#2a2f3a;--txt:#e8eaf0;--mut:#8b93a5;--acc:#6c8cff;--ok:#3ecf8e;--err:#ff6b6b}
   *{box-sizing:border-box}
@@ -13,7 +13,7 @@
   p.sub{color:var(--mut);margin:0 0 20px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
   label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
-  select,input[type=text]{width:100%;padding:10px 12px;background:#0f1115;border:1px solid var(--line);border-radius:8px;color:var(--txt);font:inherit}
+  select,input[type=text],input[type=number]{width:100%;padding:10px 12px;background:#0f1115;border:1px solid var(--line);border-radius:8px;color:var(--txt);font:inherit}
   .drop{border:2px dashed var(--line);border-radius:14px;padding:36px 16px;text-align:center;cursor:pointer;transition:.2s}
   .drop.over{border-color:var(--acc);background:#6c8cff14}
   .drop b{display:block;font-size:1.05rem;margin-bottom:4px}
@@ -39,26 +39,28 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>📎 Media a Enlace</h1>
-  <p class="sub">Sube una foto, vídeo o música y obtén un enlace directo (.jpg, .mp4, .mp3…) para usarlo en otra web o app.</p>
+  <h1>🎞️ Media a MP4</h1>
+  <p class="sub">Sube una foto, vídeo o música y obtén siempre un enlace directo <b>.mp4</b> para usarlo en otra web o app.</p>
 
   <div class="card">
     <label for="prov">Servicio de alojamiento</label>
     <select id="prov">
       <option value="tmpfiles">tmpfiles.org — gratis, sin registro (dura 1 hora)</option>
       <option value="cloudinary">Cloudinary — permanente (necesita cuenta gratis)</option>
-      <option value="local">Local — solo funciona en este navegador/pestaña</option>
+      <option value="local">Local — solo funciona en esta pestaña</option>
     </select>
     <div id="cldBox" style="display:none">
       <label>Cloud name</label><input type="text" id="cldName" placeholder="mi-cloud">
       <label>Upload preset (tipo "Unsigned")</label><input type="text" id="cldPreset" placeholder="mi_preset">
-      <p class="note">En Cloudinary: Settings → Upload → Add upload preset → Signing mode: <code>Unsigned</code>. Los datos se guardan solo en tu navegador.</p>
+      <p class="note">En Cloudinary: Settings → Upload → Add upload preset → Signing mode: <code>Unsigned</code>. Se guarda solo en tu navegador.</p>
     </div>
+    <label for="dur">Duración del vídeo cuando subes una foto (segundos)</label>
+    <input type="number" id="dur" min="1" max="60" value="5">
   </div>
 
   <div class="drop" id="drop" tabindex="0">
     <b>Arrastra archivos aquí o toca para elegir</b>
-    <span>Fotos, vídeos y audio</span>
+    <span>Fotos, vídeos y audio → se convierten a MP4</span>
     <input type="file" id="file" accept="image/*,video/*,audio/*" multiple hidden>
   </div>
 
@@ -66,11 +68,14 @@
 
   <div class="card">
     <details>
-      <summary>¿Cómo funciona y qué limitaciones tiene?</summary>
-      <p class="note">Una página HTML sola no puede guardar archivos en internet: necesita un servidor. Por eso esta web envía tu archivo a un servicio de alojamiento y te devuelve el enlace directo.<br><br>
-      • <b>tmpfiles.org</b>: sin configuración, pero el enlace se borra a la hora. Ideal para pruebas.<br>
-      • <b>Cloudinary</b>: enlaces permanentes y rápidos, con plan gratuito. Recomendado para uso real.<br>
-      • <b>Local</b>: enlace <code>blob:</code> que solo existe mientras la pestaña esté abierta.</p>
+      <summary>¿Cómo funciona?</summary>
+      <p class="note">
+      • <b>Vídeo MP4</b>: se sube tal cual.<br>
+      • <b>Vídeo en otro formato</b> (MOV, WebM…): se reconvierte a MP4 en tu navegador, en tiempo real.<br>
+      • <b>Foto</b>: se convierte en un MP4 de los segundos que elijas.<br>
+      • <b>Música</b>: se convierte en un MP4 con una visualización de ondas y el audio.<br><br>
+      La conversión usa tu navegador y necesita que soporte grabar MP4 (Chrome, Edge y Safari recientes). Firefox no puede.<br>
+      Una página HTML sola no guarda archivos en internet, por eso el MP4 resultante se envía a un servicio de alojamiento que devuelve el enlace.</p>
     </details>
   </div>
 </div>
@@ -96,73 +101,164 @@ drop.onkeydown = e => { if(e.key==='Enter'||e.key===' ') fileIn.click(); };
 drop.addEventListener('drop', e => handle(e.dataTransfer.files));
 fileIn.onchange = () => { handle(fileIn.files); fileIn.value=''; };
 
-function fmt(b){ return b>1e6 ? (b/1e6).toFixed(1)+' MB' : Math.max(1,Math.round(b/1e3))+' KB'; }
-function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const fmt = b => b>1e6 ? (b/1e6).toFixed(1)+' MB' : Math.max(1,Math.round(b/1e3))+' KB';
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const even = n => Math.max(2, Math.round(n/2)*2);
+const fit = (w,h) => { const s = Math.min(1, 1280/Math.max(w,h)); return [even(w*s), even(h*s)]; };
 
+/* ---------- conversión a MP4 ---------- */
+const MIMES = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'];
+const mp4Mime = () => window.MediaRecorder ? MIMES.find(m => MediaRecorder.isTypeSupported(m)) : null;
+
+function record(stream, mime, stopPromise){
+  return new Promise((res, rej) => {
+    const rec = new MediaRecorder(stream, {mimeType: mime, videoBitsPerSecond: 4e6, audioBitsPerSecond: 128e3});
+    const chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onerror = e => rej(e.error || new Error('Error al grabar el MP4'));
+    rec.onstop = () => res(new Blob(chunks, {type: 'video/mp4'}));
+    rec.start(500);
+    stopPromise.then(() => new Promise(r => setTimeout(r, 300))).then(() => rec.state !== 'inactive' && rec.stop(), rej);
+  });
+}
+
+async function imageToMp4(file, mime, seconds, onP){
+  const url = URL.createObjectURL(file);
+  const img = new Image(); img.src = url;
+  await img.decode().catch(() => { throw new Error('No se puede leer la imagen (¿HEIC?).'); });
+  const [W,H] = fit(img.naturalWidth, img.naturalHeight);
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d');
+  let on = true; const t0 = performance.now();
+  (function loop(){ if(!on) return; cx.drawImage(img,0,0,W,H); onP(Math.min(99,(performance.now()-t0)/(seconds*10))); requestAnimationFrame(loop); })();
+  const stream = cv.captureStream(30);
+  const blob = await record(stream, mime, new Promise(r => setTimeout(r, seconds*1000)));
+  on = false; URL.revokeObjectURL(url);
+  return blob;
+}
+
+async function mediaToMp4(file, kind, mime, onP){
+  const url = URL.createObjectURL(file);
+  const el = document.createElement(kind === 'video' ? 'video' : 'audio');
+  el.src = url; el.playsInline = true; el.preload = 'auto';
+  el.style.cssText = 'position:fixed;left:-9999px;width:2px;height:2px';
+  document.body.appendChild(el);
+  await new Promise((r,j) => { el.onloadedmetadata = r; el.onerror = () => j(new Error('No se puede leer el archivo.')); });
+  const [W,H] = kind === 'video' ? fit(el.videoWidth || 1280, el.videoHeight || 720) : [1280,720];
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d');
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  const src = ac.createMediaElementSource(el);
+  const an = ac.createAnalyser(); an.fftSize = 128;
+  const dest = ac.createMediaStreamDestination();
+  src.connect(an); an.connect(dest);           // sin salida a altavoces: conversión silenciosa
+  const data = new Uint8Array(an.frequencyBinCount);
+  const title = file.name.replace(/\.[^.]+$/,'');
+  let on = true;
+  (function loop(){
+    if(!on) return;
+    if(kind === 'video'){ cx.drawImage(el,0,0,W,H); }
+    else {
+      cx.fillStyle = '#0f1115'; cx.fillRect(0,0,W,H);
+      an.getByteFrequencyData(data);
+      const n = data.length, bw = W/n;
+      for(let i=0;i<n;i++){ const h = data[i]/255*H*0.55; cx.fillStyle = `hsl(${220+i*1.2},80%,65%)`; cx.fillRect(i*bw+2, H*0.75-h, bw-4, h); }
+      cx.fillStyle = '#e8eaf0'; cx.font = '600 44px system-ui,sans-serif'; cx.textAlign = 'center';
+      cx.fillText('♪ ' + title.slice(0,40), W/2, H*0.88);
+    }
+    if(el.duration && isFinite(el.duration)) onP(Math.min(99, el.currentTime/el.duration*100));
+    requestAnimationFrame(loop);
+  })();
+  const stream = new MediaStream([...cv.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+  const ended = new Promise(r => el.onended = r);
+  await ac.resume();
+  const recP = record(stream, mime, ended);
+  await el.play().catch(() => { throw new Error('El navegador bloqueó la reproducción para convertir.'); });
+  const blob = await recP;
+  on = false; ac.close(); el.remove(); URL.revokeObjectURL(url);
+  return blob;
+}
+
+/* ---------- interfaz ---------- */
 function handle(files){
   [...files].forEach(f => {
-    if(!/^(image|video|audio)\//.test(f.type)){ return; }
+    const kind = (f.type || '').split('/')[0];
+    if(!['image','video','audio'].includes(kind)) return;
     list.style.display = 'block';
     const el = document.createElement('div'); el.className = 'item';
     const url = URL.createObjectURL(f);
-    const kind = f.type.split('/')[0];
     const tag = kind==='image' ? `<img src="${url}">` : kind==='video' ? `<video src="${url}" controls playsinline></video>` : `<audio src="${url}" controls></audio>`;
     el.innerHTML = `<div class="name">${esc(f.name)}</div><div class="meta">${fmt(f.size)} · ${f.type}</div>
       <div class="prev">${tag}</div><div class="bar"><i></i></div><div class="status meta">Preparando…</div><div class="out"></div>`;
     list.prepend(el);
-    upload(f, url, kind, el);
+    process(f, kind, el);
   });
 }
 
-function upload(file, localUrl, kind, el){
+async function process(file, kind, el){
   const bar = el.querySelector('.bar i'), st = el.querySelector('.status');
-  const done = link => {
-    bar.style.width = '100%'; st.className = 'status st-ok'; st.textContent = '✔ Listo';
-    const embed = kind==='image' ? `<img src="${link}">` : kind==='video' ? `<video src="${link}" controls></video>` : `<audio src="${link}" controls></audio>`;
+  const fail = m => { st.className = 'status st-err'; st.textContent = '✖ ' + m; };
+  try{
+    let mp4;
+    const base = file.name.replace(/\.[^.]+$/,'') || 'media';
+    const isMp4 = kind === 'video' && (file.type === 'video/mp4' || /\.mp4$/i.test(file.name));
+    if(isMp4){ mp4 = file; }
+    else {
+      const mime = mp4Mime();
+      if(!mime) return fail('Este navegador no puede crear MP4. Usa Chrome, Edge o Safari.');
+      const onP = p => { bar.style.width = (p*0.5)+'%'; st.textContent = 'Convirtiendo a MP4… ' + Math.round(p) + '%'; };
+      st.textContent = 'Convirtiendo a MP4…';
+      let blob;
+      if(kind === 'image') blob = await imageToMp4(file, mime, Math.min(60, Math.max(1, +$('#dur').value || 5)), onP);
+      else blob = await mediaToMp4(file, kind, mime, onP);
+      mp4 = new File([blob], base.replace(/[^\w\-]+/g,'_') + '.mp4', {type: 'video/mp4'});
+      el.querySelector('.prev').innerHTML = `<video src="${URL.createObjectURL(mp4)}" controls playsinline></video>`;
+    }
+    const link = await send(mp4, p => { bar.style.width = (50 + p/2) + '%'; st.textContent = 'Subiendo… ' + Math.round(p) + '%'; });
+    bar.style.width = '100%'; st.className = 'status st-ok'; st.textContent = '✔ Listo · ' + fmt(mp4.size);
+    const embed = `<video src="${link}" controls></video>`;
     el.querySelector('.out').innerHTML = `
-      <label>Enlace directo</label>
+      <label>Enlace directo .mp4</label>
       <div class="row"><input type="text" readonly value="${esc(link)}"><button data-c="${esc(link)}">Copiar</button></div>
       <label>Código para incrustar</label>
       <div class="row"><input type="text" readonly value="${esc(embed)}"><button class="sec" data-c="${esc(embed)}">Copiar</button></div>`;
     el.querySelectorAll('button[data-c]').forEach(b => b.onclick = async () => {
       try{ await navigator.clipboard.writeText(b.dataset.c); }catch(e){ b.previousElementSibling.select(); document.execCommand('copy'); }
-      const t = b.textContent; b.textContent = '¡Copiado!'; setTimeout(()=>b.textContent=t,1200);
+      const t = b.textContent; b.textContent = '¡Copiado!'; setTimeout(() => b.textContent = t, 1200);
     });
-  };
-  const fail = msg => { st.className = 'status st-err'; st.textContent = '✖ ' + msg; };
+  }catch(e){ fail(e.message || 'Error inesperado.'); }
+}
 
-  const p = prov.value;
-  if(p==='local'){ return done(localUrl); }
-
-  let endpoint, fd = new FormData();
-  if(p==='cloudinary'){
-    const cn = $('#cldName').value.trim(), pr = $('#cldPreset').value.trim();
-    if(!cn || !pr) return fail('Rellena Cloud name y Upload preset.');
-    endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cn)}/auto/upload`;
-    fd.append('file', file); fd.append('upload_preset', pr);
-  } else {
-    endpoint = 'https://tmpfiles.org/api/v1/upload';
-    fd.append('file', file);
-  }
-
-  const x = new XMLHttpRequest();
-  x.open('POST', endpoint);
-  x.upload.onprogress = e => { if(e.lengthComputable){ const pc = Math.round(e.loaded/e.total*100); bar.style.width = pc+'%'; st.textContent = 'Subiendo… '+pc+'%'; } };
-  x.onerror = () => fail('Error de red o el servicio bloqueó la petición. Prueba otro servicio.');
-  x.onload = () => {
-    try{
-      const r = JSON.parse(x.responseText);
-      if(p==='cloudinary'){
-        if(r.secure_url) return done(r.secure_url);
-        return fail(r.error?.message || 'Cloudinary rechazó el archivo.');
-      }
-      if(r.status==='success' && r.data?.url){
-        return done(r.data.url.replace(/^http:/,'https:').replace('tmpfiles.org/','tmpfiles.org/dl/'));
-      }
-      fail('Respuesta inesperada del servicio.');
-    }catch(e){ fail('No se pudo leer la respuesta (HTTP '+x.status+').'); }
-  };
-  x.send(fd);
+function send(file, onP){
+  return new Promise((res, rej) => {
+    const p = prov.value;
+    if(p === 'local') return res(URL.createObjectURL(file));
+    let endpoint; const fd = new FormData();
+    if(p === 'cloudinary'){
+      const cn = $('#cldName').value.trim(), pr = $('#cldPreset').value.trim();
+      if(!cn || !pr) return rej(new Error('Rellena Cloud name y Upload preset.'));
+      endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(cn)}/video/upload`;
+      fd.append('file', file); fd.append('upload_preset', pr);
+    } else {
+      endpoint = 'https://tmpfiles.org/api/v1/upload'; fd.append('file', file);
+    }
+    const x = new XMLHttpRequest();
+    x.open('POST', endpoint);
+    x.upload.onprogress = e => e.lengthComputable && onP(e.loaded/e.total*100);
+    x.onerror = () => rej(new Error('Error de red o el servicio bloqueó la petición. Prueba otro servicio.'));
+    x.onload = () => {
+      try{
+        const r = JSON.parse(x.responseText);
+        if(p === 'cloudinary'){
+          if(r.secure_url) return res(r.secure_url.replace(/\.[a-z0-9]+$/i,'.mp4'));
+          return rej(new Error(r.error?.message || 'Cloudinary rechazó el archivo.'));
+        }
+        if(r.status === 'success' && r.data?.url) return res(r.data.url.replace(/^http:/,'https:').replace('tmpfiles.org/','tmpfiles.org/dl/'));
+        rej(new Error('Respuesta inesperada del servicio.'));
+      }catch(e){ rej(new Error('No se pudo leer la respuesta (HTTP ' + x.status + ').')); }
+    };
+    x.send(fd);
+  });
 }
 </script>
 </body>
