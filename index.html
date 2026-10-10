@@ -255,6 +255,7 @@ try {
   }
 } catch (e) { console.warn("App Check no se pudo iniciar:", e); }
 const auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
+storage.maxUploadRetryTime = 45000; storage.maxOperationRetryTime = 30000;
 
 /* ---------- utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -369,8 +370,8 @@ const errMsg = e => {
     "auth/email-already-in-use": "Ese correo ya está registrado.", "auth/weak-password": "La contraseña debe tener al menos 6 caracteres.", "auth/invalid-email": "Correo no válido.",
     "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin conexión con Firebase.",
     "auth/operation-not-allowed": "Activa «Correo/contraseña» en Authentication (consola Firebase).",
-    "permission-denied": "Permiso denegado por las reglas de seguridad.", "storage/unauthorized": "Permiso denegado en Storage (revisa storage.rules y App Check).",
-    "storage/quota-exceeded": "Cuota de Storage agotada.", "storage/retry-limit-exceeded": "Tiempo de subida agotado. Reintenta.", "storage/canceled": "Cancelado.",
+    "permission-denied": "Firestore denegó el permiso: publica firestore.rules (o desactiva el cumplimiento de App Check).", "storage/unauthorized": "Storage denegó el permiso: publica storage.rules en Firebase → Storage → Reglas (o desactiva el cumplimiento de App Check).", "storage/bucket-not-found": "No existe el bucket: activa Storage en la consola de Firebase.", "storage/project-not-found": "Proyecto de Storage no encontrado: revisa firebaseConfig.", "storage/unknown": "Error desconocido de Storage: revisa que Storage esté activado y las reglas publicadas.", "auth/operation-not-supported-in-this-environment": "Abre la web desde http://localhost o Firebase Hosting, no como archivo local (file://).", "auth/unauthorized-domain": "Dominio no autorizado: añádelo en Authentication → Configuración → Dominios autorizados.",
+    "storage/quota-exceeded": "Cuota de Storage agotada.", "storage/retry-limit-exceeded": "Tiempo agotado: Storage no responde. Revisa que esté activado, las reglas publicadas y tu conexión.", "storage/canceled": "Cancelado.",
     "unavailable": "Firebase no está disponible ahora mismo."
   };
   return m[c] || e?.message || "Error desconocido";
@@ -437,10 +438,11 @@ function stageFiles(list) {
     if (!file.size) { rejected.push(`${file.name}: archivo vacío`); continue; }
     const max = APP_CONFIG.maxMB[c.kind] * 1048576;
     if (file.size > max) { rejected.push(`${file.name}: supera ${APP_CONFIG.maxMB[c.kind]} MB`); continue; }
-    S.queue.push({ id: uid8(), file, ...c, previewUrl: c.kind === "audio" ? "" : URL.createObjectURL(file), status: "ready", progress: 0, speed: 0, vis: S.defVis });
+    S.queue.push({ id: uid8(), file, ...c, previewUrl: c.kind === "audio" ? "" : URL.createObjectURL(file), status: "queued", progress: 0, speed: 0, vis: S.defVis });
   }
   if (rejected.length) toast(rejected.slice(0, 4).join("\n") + (rejected.length > 4 ? `\n…y ${rejected.length - 4} más` : ""), "error", 7000);
   if (location.hash !== "#upload") location.hash = "#upload"; else renderQueue();
+  pump();
 }
 function pump() {
   let slots = MAX_PAR - S.queue.filter(q => q.status === "uploading").length;
@@ -453,6 +455,7 @@ async function runUpload(q) {
   const sref = ref(storage, path);
   const task = uploadBytesResumable(sref, q.file, { contentType: q.contentType, customMetadata: { ownerId: user.uid } });
   q.task = task;
+  setTimeout(() => { if (q.status === "uploading" && !(q.bytes > 0)) toast("La subida no avanza. Comprueba que Storage esté creado y que las reglas de storage.rules estén publicadas (Firebase → Storage → Reglas).", "error", 10000); }, 20000);
   task.on("state_changed", snap => {
     const now = performance.now(), dt = (now - q.lastT) / 1000;
     if (dt >= 0.4) { const inst = (snap.bytesTransferred - q.lastB) / dt; q.speed = q.speed ? q.speed * .6 + inst * .4 : inst; q.lastT = now; q.lastB = snap.bytesTransferred; }
@@ -768,7 +771,8 @@ function render() {
   if (S.view === "auth") page = authPage(needsAuth);
   else page = { home: homePage, upload: uploadPage, library: libraryPage, collections: collectionsPage, history: historyPage, profile: profilePage }[S.view]();
   const scroll = scrollY;
-  $("#app").innerHTML = headerHTML() + `<main class="wrap">${page}</main>`;
+  const warn = location.protocol === "file:" ? `<div class="notice">${icon("alert")} Abriste la página como archivo local (file://): el inicio de sesión y las subidas no funcionarán así. Ejecútala con <b>firebase serve --only hosting</b> (http://localhost:5000) o publícala en Firebase Hosting.</div>` : "";
+  $("#app").innerHTML = headerHTML() + `<main class="wrap">${warn}${page}</main>`;
   if (S.view === "library") renderLibraryParts();
   if (S.view === "upload") renderQueue();
   hydrate($("#app")); if (S.view === "library" || S.view === "home") scrollTo(0, scroll);
